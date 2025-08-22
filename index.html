@@ -95,6 +95,16 @@ button.small{padding:6px 8px;font-size:14px}
 </div>
 
 <script>
+    const wallImage = new Image();
+    wallImage.src = 'images/wall.png'; 
+    const crateImage = new Image();
+    crateImage.src = 'images/crate.png';
+    const createImage = new Image();
+    wallImage.src = 'images/wall.png';
+    const characterImage = new Image();
+    characterImage.src = 'images/character_ghost.png';
+    const goalImage = new Image();
+    goalImage.src = 'images/goal.png';
 
 // --- unsaved changes window warning ---
 let hasUnsavedChanges = false;
@@ -136,19 +146,32 @@ function makeState(level){
   return {grid:parsed.grid,player:parsed.player,crates,goals,h:parsed.h,w:parsed.w,moves:0,history:[]};
 }
 const canvas=document.getElementById('canvas'),ctx=canvas.getContext('2d'),tileSize=64;
-function draw(state){
-  const W=state.w*tileSize,H=state.h*tileSize;
-  canvas.width=W;canvas.height=H;
-  ctx.clearRect(0,0,W,H);
-  for(let y=0;y<state.h;y++){for(let x=0;x<state.w;x++){
+function draw(state)
+{
+    const W=state.w*tileSize,H=state.h*tileSize;
+    canvas.width=W;canvas.height=H;
+    ctx.clearRect(0,0,W,H);
+    for(let y=0;y<state.h;y++){for(let x=0;x<state.w;x++){
     const ch=state.grid[y][x]||' ';
     const px=x*tileSize,py=y*tileSize;
-    if(ch==='#'){ctx.fillStyle='#888';ctx.fillRect(px,py,tileSize,tileSize);ctx.fillStyle='#777';ctx.fillRect(px+6,py+6,tileSize-12,tileSize-12);}
+    if(ch==='#')
+    {
+        ctx.drawImage(wallImage, px, py, tileSize, tileSize);
+    }
     else {ctx.fillStyle='#071627';ctx.fillRect(px,py,tileSize,tileSize);ctx.fillStyle='#0f172a';ctx.fillRect(px+6,py+6,tileSize-12,tileSize-12);}
-  }}
-  state.goals.forEach(g=>{const px=g.x*tileSize,py=g.y*tileSize;ctx.fillStyle=getComputedStyle(document.documentElement).getPropertyValue('--goal');ctx.beginPath();ctx.arc(px+tileSize/2,py+tileSize/2,tileSize*0.16,0,Math.PI*2);ctx.fill();});
-  state.crates.forEach(c=>{const px=c.x*tileSize,py=c.y*tileSize;ctx.fillStyle=getComputedStyle(document.documentElement).getPropertyValue('--crate');ctx.fillRect(px+10,py+10,tileSize-20,tileSize-20);ctx.fillStyle='#7c2d0a';ctx.fillRect(px+12,py+12,tileSize-24,tileSize-24);});
-  const p=state.player;ctx.fillStyle=getComputedStyle(document.documentElement).getPropertyValue('--player');ctx.beginPath();ctx.arc(p.x*tileSize+tileSize/2,p.y*tileSize+tileSize/2,tileSize*0.18,0,Math.PI*2);ctx.fill();
+    }}
+    state.goals.forEach(g =>
+    {
+        const px = g.x * tileSize, py = g.y * tileSize;
+        ctx.drawImage(goalImage, px, py, tileSize, tileSize);
+    });
+    state.crates.forEach(c =>
+    {
+        const px = c.x * tileSize, py = c.y * tileSize;
+        ctx.drawImage(crateImage, px, py, tileSize, tileSize);
+    });
+    const p = state.player;
+    ctx.drawImage(characterImage, p.x * tileSize, p.y * tileSize, tileSize, tileSize);
 }
 function isWall(s,x,y){return(y<0||x<0||y>=s.h||x>=s.w)||(s.grid[y][x]==='#');}
 function crateAt(s,x,y){return s.crates.find(c=>c.x===x&&c.y===y);}
