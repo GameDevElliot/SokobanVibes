@@ -1,0 +1,351 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Sokoban — Playable + Editor</title>
+<style>
+:root{--bg:#0f172a;--panel:#0b1220;--tile:#1f2937;--floor:#0ea5a9;--crate:#b45309;--goal:#10b981;--player:#f97316}
+html,body{height:100%;margin:0;background:linear-gradient(180deg,var(--bg),#071126);font-family:system-ui,-apple-system,Segoe UI,Roboto}
+.wrap{height:100%;display:flex;align-items:center;justify-content:center}
+.ui{width:800px;background:linear-gradient(180deg,rgba(255,255,255,0.03),rgba(255,255,255,0.01));border-radius:12px;padding:20px;box-shadow:0 10px 30px rgba(2,6,23,0.6)}
+.row{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+h1{margin:0 0 12px 0;font-size:20px;color:#e6eef8}
+button{background:#0b1220;color:#cfe9f3;border:1px solid rgba(255,255,255,0.03);padding:8px 12px;border-radius:8px;cursor:pointer}
+button.small{padding:6px 8px;font-size:14px}
+#canvas{background:var(--panel);display:block;margin:14px auto;border-radius:8px}
+.center{text-align:center}
+.levels{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.levelBtn{width:100px;height:44px;display:flex;align-items:center;justify-content:center;background:#08101a;border-radius:8px;color:#bfe6e9;cursor:pointer}
+.hint{color:#9fb8c0;font-size:13px;margin-top:8px}
+.foot{display:flex;justify-content:space-between;align-items:center;margin-top:12px;color:#9fb8c0}
+.tileSelector{display:flex;gap:8px;margin-top:8px}
+.tileBtn{padding:6px 10px;border-radius:6px;background:#08101a;color:#cfe9f3;cursor:pointer}
+.tileBtn.active{background:#0ea5a9;color:black;font-weight:bold}
+</style>
+</head>
+<body>
+<div class="wrap">
+<div class="ui" id="ui">
+
+<!-- Main Menu -->
+<div id="mainMenu">
+<h1>Sokoban Vibes — Vibe-coded sokoban puzzle with level editor and local storagea</h1>
+<div class="row">
+  <button id="playStockBtn">Play Stock Levels</button>
+  <button id="playCustomBtn">Play Custom Levels</button>
+  <button id="editorBtn">Level Editor</button>
+  <button id="resetAll" class="small">Clear Local Storage</button>
+</div>
+<p class="hint">Use arrow keys or WASD. Push crates onto green goals.</p>
+</div>
+
+<!-- Stock Level Select -->
+<div id="levelSelect" style="display:none">
+<h1>Select a Stock Level</h1>
+<div class="levels" id="levelsContainer"></div>
+<div style="margin-top:10px"><button id="backToMenu1">Back</button></div>
+</div>
+
+<!-- Custom Level Select -->
+<div id="customLevelSelect" style="display:none">
+<h1>Select a Custom Level</h1>
+<div class="levels" id="customLevelsContainer"></div>
+<div style="margin-top:10px"><button id="backToMenu2">Back</button></div>
+</div>
+
+<!-- Game UI -->
+<div id="gameUI" style="display:none">
+<div class="row" style="justify-content:space-between">
+  <div>
+    <button id="btnRestart">Restart</button>
+    <button id="btnUndo">Undo</button>
+    <button id="btnExit">Exit to Levels</button>
+  </div>
+  <div style="color:#cfe9f3">Moves: <span id="moves">0</span></div>
+</div>
+<canvas id="canvas" width="640" height="640"></canvas>
+<div class="foot"><div id="levelName"></div><div id="winMsg"></div></div>
+</div>
+
+<!-- Editor UI -->
+<div id="editorUI" style="display:none">
+<h1>Level Editor (10×10)</h1>
+<div class="tileSelector" id="tileSelector"></div>
+<canvas id="editorCanvas" width="640" height="640"></canvas>
+<div class="row">
+  <input type="text" id="levelNameInput" placeholder="Level Name">
+  <button id="saveLevelBtn">Save</button>
+  <button id="openLevelBtn">Open</button>
+  <button id="deleteLevelBtn">Delete</button>
+  <button id="playTestBtn">Play</button>
+  <button id="backFromEditorBtn">Back</button>
+</div>
+</div>
+
+<!-- Editor Open Level Select -->
+<div id="editorOpenSelect" style="display:none">
+<h1>Open Custom Level</h1>
+<div class="levels" id="editorOpenLevelsContainer"></div>
+<div style="margin-top:10px"><button id="backToEditorBtn">Back to Editor</button></div>
+</div>
+
+</div>
+</div>
+
+<script>
+
+// --- unsaved changes window warning ---
+let hasUnsavedChanges = false;
+window.addEventListener("beforeunload", (e) => {
+  if (hasUnsavedChanges) {
+    e.preventDefault();             // required by some browsers
+    e.returnValue = "";             // triggers the confirmation dialog
+    return "";                      // for older browsers
+  }
+});
+
+
+// --- stock levels ---
+const LEVELS = [
+  {name: 'Level 1', map:["#####","#.@ #","# $ #","#   #","#####"]},
+  {name: 'Level 2', map:["  #####  ","  #   #  ","###$  #  ","# .#$ ###","#  .$  @#","#   #   #","#####   #","    #####"]},
+  {name: 'Level 3', map:["######","#.@$ #","# $$ #","# .. #","######"]}
+];
+
+// --- parse, state, draw functions ---
+function parseLevel(raw){const rows = raw.map(r=>r.split(''));
+  const h = rows.length, w = Math.max(...rows.map(r=>r.length));
+  const grid = Array.from({length:h},()=>Array(w).fill(' ')); let player = {x:0,y:0};
+  for(let y=0;y<h;y++){for(let x=0;x<w;x++){const ch=(rows[y][x]||' ');
+    if(ch==='#') grid[y][x]='#'; else if(ch===' ') grid[y][x]='.';
+    else if(ch==="@"){grid[y][x]='.';player={x,y};}
+    else if(ch==="$"){grid[y][x]='$';} else if(ch==='.') grid[y][x]='.';
+  }}
+  return {grid,player,h,w};
+}
+function makeState(level){
+  const parsed = parseLevel(level.map);
+  const crates=[],goals=[];
+  for(let y=0;y<parsed.h;y++){for(let x=0;x<parsed.w;x++){
+    const ch=level.map[y][x]||' ';
+    if(ch==='$'||ch==='*') crates.push({x,y});
+    if(ch==='.'||ch==='*') goals.push({x,y});
+  }}
+  return {grid:parsed.grid,player:parsed.player,crates,goals,h:parsed.h,w:parsed.w,moves:0,history:[]};
+}
+const canvas=document.getElementById('canvas'),ctx=canvas.getContext('2d'),tileSize=64;
+function draw(state){
+  const W=state.w*tileSize,H=state.h*tileSize;
+  canvas.width=W;canvas.height=H;
+  ctx.clearRect(0,0,W,H);
+  for(let y=0;y<state.h;y++){for(let x=0;x<state.w;x++){
+    const ch=state.grid[y][x]||' ';
+    const px=x*tileSize,py=y*tileSize;
+    if(ch==='#'){ctx.fillStyle='#888';ctx.fillRect(px,py,tileSize,tileSize);ctx.fillStyle='#777';ctx.fillRect(px+6,py+6,tileSize-12,tileSize-12);}
+    else {ctx.fillStyle='#071627';ctx.fillRect(px,py,tileSize,tileSize);ctx.fillStyle='#0f172a';ctx.fillRect(px+6,py+6,tileSize-12,tileSize-12);}
+  }}
+  state.goals.forEach(g=>{const px=g.x*tileSize,py=g.y*tileSize;ctx.fillStyle=getComputedStyle(document.documentElement).getPropertyValue('--goal');ctx.beginPath();ctx.arc(px+tileSize/2,py+tileSize/2,tileSize*0.16,0,Math.PI*2);ctx.fill();});
+  state.crates.forEach(c=>{const px=c.x*tileSize,py=c.y*tileSize;ctx.fillStyle=getComputedStyle(document.documentElement).getPropertyValue('--crate');ctx.fillRect(px+10,py+10,tileSize-20,tileSize-20);ctx.fillStyle='#7c2d0a';ctx.fillRect(px+12,py+12,tileSize-24,tileSize-24);});
+  const p=state.player;ctx.fillStyle=getComputedStyle(document.documentElement).getPropertyValue('--player');ctx.beginPath();ctx.arc(p.x*tileSize+tileSize/2,p.y*tileSize+tileSize/2,tileSize*0.18,0,Math.PI*2);ctx.fill();
+}
+function isWall(s,x,y){return(y<0||x<0||y>=s.h||x>=s.w)||(s.grid[y][x]==='#');}
+function crateAt(s,x,y){return s.crates.find(c=>c.x===x&&c.y===y);}
+function tryMove(s,dx,dy){const nx=s.player.x+dx,ny=s.player.y+dy;if(isWall(s,nx,ny))return false;
+  const c=crateAt(s,nx,ny);if(!c){pushHistory(s);s.player.x=nx;s.player.y=ny;s.moves++;return true;}
+  const nnx=nx+dx,nny=ny+dy;if(isWall(s,nnx,nny)||crateAt(s,nnx,nny))return false;
+  pushHistory(s);c.x=nnx;c.y=nny;s.player.x=nx;s.player.y=ny;s.moves++;return true;}
+function checkWin(s){return s.goals.every(g=>s.crates.some(c=>c.x===g.x&&c.y===g.y));}
+function pushHistory(s){s.history.push({player:{x:s.player.x,y:s.player.y},crates:s.crates.map(c=>({...c})),moves:s.moves});if(s.history.length>100)s.history.shift();}
+function undo(s){if(!s.history.length)return;const last=s.history.pop();s.player=last.player;s.crates=last.crates;s.moves=last.moves;}
+
+// --- UI flow ---
+let currentState=null,currentLevelIndex=0,currentIsCustom=false;
+const mainMenu=document.getElementById('mainMenu');
+const levelSelect=document.getElementById('levelSelect');
+const customLevelSelect=document.getElementById('customLevelSelect');
+const gameUI=document.getElementById('gameUI');
+const levelsContainer=document.getElementById('levelsContainer');
+const customLevelsContainer=document.getElementById('customLevelsContainer');
+const levelName=document.getElementById('levelName');
+const winMsg=document.getElementById('winMsg');
+const movesEl=document.getElementById('moves');
+
+function showMenu(){hideEverything();mainMenu.style.display='block';}
+function showLevelSelect(){hideEverything();levelSelect.style.display='block';}
+function showCustomLevelSelect(){hideEverything();customLevelSelect.style.display='block'}
+function showGame(){hideEverything();gameUI.style.display='block';}
+function hideEverything()
+{
+  mainMenu.style.display='none';
+  levelSelect.style.display='none';
+  customLevelSelect.style.display='none';
+  gameUI.style.display='none';
+  editorUI.style.display='none';
+  editorOpenSelect.style.display='none';
+}
+
+function loadLevel(index,isCustom=false)
+{
+  currentLevelIndex=index;
+  currentIsCustom=isCustom;
+  const src=isCustom?getCustomLevels()[index]:LEVELS[index];
+  currentState=makeState(src);
+  levelName.textContent=src.name;
+  winMsg.textContent='';
+  movesEl.textContent='0';
+  draw(currentState);
+  showGame();
+}
+function buildLevelButtons(){levelsContainer.innerHTML='';LEVELS.forEach((lev,i)=>{const b=document.createElement('div');b.className='levelBtn';b.textContent=lev.name;b.onclick=()=>loadLevel(i);levelsContainer.appendChild(b);});}
+function getCustomLevels(){return JSON.parse(localStorage.getItem('custom_levels')||'[]');}
+function setCustomLevels(arr){localStorage.setItem('custom_levels',JSON.stringify(arr));}
+function buildCustomLevelButtons()
+{
+  customLevelsContainer.innerHTML='';
+  const arr=getCustomLevels();
+  arr.forEach((lev,i)=>
+    {
+      const b=document.createElement('div');
+      b.className='levelBtn';
+      b.textContent=lev.name;
+      b.onclick=()=>loadLevel(i,true);
+      customLevelsContainer.appendChild(b);
+    }
+  );
+}
+
+// --- Event wiring stock/custom ---
+document.getElementById('playStockBtn').onclick=()=>{buildLevelButtons();showLevelSelect();};
+document.getElementById('playCustomBtn').onclick=()=>{buildCustomLevelButtons();showCustomLevelSelect();};
+document.getElementById('backToMenu1').onclick=()=>showMenu();
+document.getElementById('backToMenu2').onclick=()=>showMenu();
+document.getElementById('btnRestart').onclick=()=>loadLevel(currentLevelIndex,currentIsCustom);
+document.getElementById('btnUndo').onclick=()=>{if(currentState){undo(currentState);movesEl.textContent=currentState.moves;draw(currentState);}};
+document.getElementById('btnExit').onclick=()=>
+{
+  gameUI.style.display = 'none';
+  currentIsCustom?showCustomLevelSelect():showLevelSelect();
+};
+document.getElementById('resetAll').onclick=()=>{localStorage.clear();alert('Progress cleared');};
+
+// keyboard
+window.addEventListener('keydown',e=>{
+  if(!currentState) return;
+  let moved=false;
+  if(['ArrowUp','w','W'].includes(e.key)) moved=tryMove(currentState,0,-1);
+  if(['ArrowDown','s','S'].includes(e.key)) moved=tryMove(currentState,0,1);
+  if(['ArrowLeft','a','A'].includes(e.key)) moved=tryMove(currentState,-1,0);
+  if(['ArrowRight','d','D'].includes(e.key)) moved=tryMove(currentState,1,0);
+  if(moved){movesEl.textContent=currentState.moves;
+  draw(currentState);
+  if(checkWin(currentState)){winMsg.textContent='Level complete!';
+  setTimeout(()=>{alert('You win!');currentIsCustom?showCustomLevelSelect():showLevelSelect();},200);}}
+});
+
+// --- Editor ---
+const editorUI=document.getElementById('editorUI');
+const editorCanvas=document.getElementById('editorCanvas');
+const ectx=editorCanvas.getContext('2d');
+const TILE_TYPES={'Wall':'#','Floor':' ','Goal':'.','Crate':'$','Player':'@'};
+let selectedTile='#';
+let editorGrid=Array.from({length:10},()=>Array(10).fill(' '));
+function drawEditor(){const size=64;editorCanvas.width=size*10;editorCanvas.height=size*10;
+  for(let y=0;y<10;y++){for(let x=0;x<10;x++){ectx.fillStyle='#071627';ectx.fillRect(x*size,y*size,size,size);ectx.fillStyle='#0f172a';ectx.fillRect(x*size+4,y*size+4,size-8,size-8);
+    const t=editorGrid[y][x];if(t==='#'){ectx.fillStyle='#888';ectx.fillRect(x*size+6,y*size+6,size-12,size-12);}
+    if(t==='.') {ectx.fillStyle=getComputedStyle(document.documentElement).getPropertyValue('--goal');ectx.beginPath();ectx.arc(x*size+size/2,y*size+size/2,size*0.16,0,Math.PI*2);ectx.fill();}
+    if(t==='$'){ectx.fillStyle=getComputedStyle(document.documentElement).getPropertyValue('--crate');ectx.fillRect(x*size+10,y*size+10,size-20,size-20);}
+    if(t==='@'){ectx.fillStyle=getComputedStyle(document.documentElement).getPropertyValue('--player');ectx.beginPath();ectx.arc(x*size+size/2,y*size+size/2,size*0.18,0,Math.PI*2);ectx.fill();}
+  }}}
+function setTileSelector(){const ts=document.getElementById('tileSelector');ts.innerHTML='';Object.entries(TILE_TYPES).forEach(([name,char])=>{const b=document.createElement('div');b.className='tileBtn';b.textContent=name;if(char===selectedTile)b.classList.add('active');
+  b.onclick=()=>{selectedTile=char;setTileSelector();};ts.appendChild(b);});}
+editorCanvas.onclick=(e)=>
+{
+  const rect=editorCanvas.getBoundingClientRect();
+  const x=Math.floor((e.clientX-rect.left)/64);
+  const y=Math.floor((e.clientY-rect.top)/64);
+  editorGrid[y][x]=selectedTile;
+  drawEditor();
+  hasUnsavedChanges = true;
+
+  localStorage.setItem('editor_cache', JSON.stringify({
+    name: document.getElementById('levelNameInput').value.trim(),
+    map: editorGrid.map(r => r.join(''))
+  }));
+};
+
+document.getElementById('editorBtn').onclick=()=>
+{
+  const cache = JSON.parse(localStorage.getItem('editor_cache') || 'null');
+  if (cache) {
+    editorGrid = cache.map.map(r => r.split(''));
+    document.getElementById('levelNameInput').value = cache.name;
+  } else {
+    editorGrid = Array.from({ length: 10 }, () => Array(10).fill(' '));
+    document.getElementById('levelNameInput').value = '';
+  }
+
+
+  editorGrid=Array.from({length:10},()=>Array(10).fill(' '));
+  selectedTile='#';
+  setTileSelector();
+  drawEditor();
+  hideEverything();
+  editorUI.style.display='block';
+};
+
+document.getElementById('backFromEditorBtn').onclick=()=>showMenu();
+document.getElementById('saveLevelBtn').onclick=()=>
+{
+  const name=document.getElementById('levelNameInput').value.trim();
+  if(!name)return alert('Enter name');
+  const map=editorGrid.map(r=>r.join(''));
+  let arr=getCustomLevels();
+  const idx=arr.findIndex(l=>l.name===name);
+  if(idx>=0)arr[idx]={name,map};
+  else arr.push({name,map});
+  setCustomLevels(arr);
+  alert('Saved');
+  hasUnsavedChanges = false;
+};
+
+// --- Editor open select screen ---
+const editorOpenSelect=document.getElementById('editorOpenSelect');
+const editorOpenLevelsContainer=document.getElementById('editorOpenLevelsContainer');
+document.getElementById('openLevelBtn').onclick=()=>{buildEditorOpenButtons();editorUI.style.display='none';editorOpenSelect.style.display='block';};
+document.getElementById('backToEditorBtn').onclick=()=>{editorOpenSelect.style.display='none';editorUI.style.display='block';};
+function buildEditorOpenButtons(){editorOpenLevelsContainer.innerHTML='';const arr=getCustomLevels();arr.forEach((lev)=>{const b=document.createElement('div');b.className='levelBtn';b.textContent=lev.name;b.onclick=()=>{editorGrid=lev.map.map(r=>r.split(''));document.getElementById('levelNameInput').value=lev.name;drawEditor();editorOpenSelect.style.display='none';editorUI.style.display='block';};editorOpenLevelsContainer.appendChild(b);});}
+
+document.getElementById('deleteLevelBtn').onclick=()=>
+{
+  const name=document.getElementById('levelNameInput').value.trim();
+  if(!name)return;
+  let arr=getCustomLevels();
+  arr=arr.filter(l=>l.name!==name);
+  setCustomLevels(arr);
+  alert('Deleted');
+
+  // wipe editor
+  editorGrid = Array.from({ length: 10 }, () => Array(10).fill(' '));
+  document.getElementById('levelNameInput').value = "";
+  drawEditor();
+
+};
+document.getElementById('playTestBtn').onclick=()=>
+{
+  const name=document.getElementById('levelNameInput').value.trim()||'Untitled';
+  const map=editorGrid.map(r=>r.join(''));
+  currentState=makeState({name,map});
+  levelName.textContent=name;
+  movesEl.textContent='0';
+  winMsg.textContent='';
+  draw(currentState);
+  showGame();
+  currentIsCustom=false;
+};
+
+// start menu
+showMenu();
+</script>
+</body>
+</html>
