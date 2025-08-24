@@ -5,23 +5,150 @@
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>Sokoban — Playable + Editor</title>
 <style>
-:root{--bg:#0f172a;--panel:#0b1220;--tile:#1f2937;--floor:#0ea5a9;--crate:#b45309;--goal:#10b981;--player:#f97316}
-html,body{height:100%;margin:0;background:linear-gradient(180deg,var(--bg),#071126);font-family:system-ui,-apple-system,Segoe UI,Roboto}
-.wrap{height:100%;display:flex;align-items:center;justify-content:center}
-.ui{width:800px;background:linear-gradient(180deg,rgba(255,255,255,0.03),rgba(255,255,255,0.01));border-radius:12px;padding:20px;box-shadow:0 10px 30px rgba(2,6,23,0.6)}
-.row{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
-h1{margin:0 0 12px 0;font-size:20px;color:#e6eef8}
-button{background:#0b1220;color:#cfe9f3;border:1px solid rgba(255,255,255,0.03);padding:8px 12px;border-radius:8px;cursor:pointer}
-button.small{padding:6px 8px;font-size:14px}
-#canvas{background:var(--panel);display:block;margin:14px auto;border-radius:8px}
-.center{text-align:center}
-.levels{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
-.levelBtn{width:100px;height:44px;display:flex;align-items:center;justify-content:center;background:#08101a;border-radius:8px;color:#bfe6e9;cursor:pointer}
-.hint{color:#9fb8c0;font-size:13px;margin-top:8px}
-.foot{display:flex;justify-content:space-between;align-items:center;margin-top:12px;color:#9fb8c0}
-.tileSelector{display:flex;gap:8px;margin-top:8px}
-.tileBtn{padding:6px 10px;border-radius:6px;background:#08101a;color:#cfe9f3;cursor:pointer}
-.tileBtn.active{background:#0ea5a9;color:black;font-weight:bold}
+  :root {
+    --bg: #0f172a;
+    --panel: #0b1220;
+    --tile: #1f2937;
+    --floor: #0ea5a9;
+    --crate: #b45309;
+    --goal: #10b981;
+    --player: #f97316;
+  }
+  
+  html, body {
+    height: 100%;
+    margin: 0;
+    background: linear-gradient(180deg, var(--bg), #071126);
+    font-family: system-ui, -apple-system, Segoe UI, Roboto;
+  }
+  
+  .wrap {
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .ui {
+    width: 800px;
+    background: linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.03),
+      rgba(255, 255, 255, 0.01)
+    );
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 10px 30px rgba(2, 6, 23, 0.6);
+  }
+  
+  .row {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+  
+  h1 {
+    margin: 0 0 12px 0;
+    font-size: 20px;
+    color: #e6eef8;
+  }
+  
+  h2 {
+    margin: 0 0 12px 0;
+    font-style: italic;
+    font-size: 16px;
+    color: #e6eef8;
+  }
+  
+  button {
+    background: #0b1220;
+    color: #cfe9f3;
+    border: 1px solid rgba(255, 255, 255, 0.03);
+    padding: 8px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+  }
+  
+  button.small {
+    padding: 6px 8px;
+    font-size: 14px;
+  }
+  
+  #canvas {
+    background: var(--panel);
+    display: block;
+    margin: 14px auto;
+    border-radius: 8px;
+  }
+  
+  .center {
+    text-align: center;
+  }
+  
+  .levels {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 12px;
+  }
+  
+  .levelButton {
+    width: 100px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #08101a;
+    border-radius: 8px;
+    color: #bfe6e9;
+    cursor: pointer;
+  }
+  
+  .hint {
+    color: #9fb8c0;
+    font-size: 13px;
+    margin-top: 8px;
+  }
+  
+  .foot {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 12px;
+    color: #9fb8c0;
+  }
+  
+  .tileSelector {
+    display: flex;
+    gap: 8px;
+    margin-top: 8px;
+  }
+  
+  .tileButton {
+    padding: 6px 10px;
+    border-radius: 6px;
+    background: #08101a;
+    color: #cfe9f3;
+    cursor: pointer;
+  }
+  
+  .tileButton.active {
+    background: #0ea5a9;
+    color: black;
+    font-weight: bold;
+  }
+  
+  /* --- Settings button style --- */
+  #clearStorageButton {
+    background: #08101a;
+    color: #ff0000;
+    font-weight: bold;
+    border: 3px solid rgb(255, 183, 0);
+    padding: 8px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+  }
 </style>
 </head>
 <body>
@@ -31,14 +158,28 @@ button.small{padding:6px 8px;font-size:14px}
 <!-- Main Menu -->
 <div id="mainMenu">
 <h1>Sokoban Vibes</h1>
-<h1>Vibe-coded sokoban puzzle with level editor and local storage</h2>
-<div class="row">
-  <button id="playStockBtn">Play Stock Levels</button>
-  <button id="playCustomBtn">Play Custom Levels</button>
-  <button id="editorBtn">Level Editor</button>
-  <button id="resetAll" class="small">Clear Local Storage</button>
+<h2>Vibe-coded sokoban puzzle with level editor and local storage</h2>
+<div class="row" style="justify-content:space-between">
+  <div>
+    <button id="playStockButton">Play Stock Levels</button>
+    <button id="playCustomButton">Play Custom Levels</button>
+    <button id="editorButton">Level Editor</button>
+  </div>
+  <div>
+    <button id="settingsButton">⚙️Settings</button>
+  </div>
 </div>
 <p class="hint">Use arrow keys or WASD. Push crates onto green goals.</p>
+</div>
+
+<!-- Settings UI -->
+<div id="settingsUI" style="display:none">
+  <h1>Settings</h1>
+  <div class="row">
+    <button id="clearStorageButton">Clear Local Storage</button>
+    <button id="backFromSettingsButton">Back</button>
+  </div>
+  <p class="hint">⚠ This will erase all saved custom levels and progress.</p>
 </div>
 
 <!-- Stock Level Select -->
@@ -59,15 +200,18 @@ button.small{padding:6px 8px;font-size:14px}
 <div id="gameUI" style="display:none">
 <div class="row" style="justify-content:space-between">
   <div>
-    <button id="btnRestart">Restart</button>
-    <button id="btnUndo">Undo</button>
-    <button id="btnExit">Exit to Levels</button>
+    <button id="ButtonRestart">Restart</button>
+    <button id="ButtonUndo">Undo</button>
+    <button id="ButtonExit">Exit</button>
   </div>
   <div style="color:#cfe9f3">Moves: <span id="moves">0</span></div>
 </div>
 <canvas id="canvas" width="640" height="640"></canvas>
 <div class="foot"><div id="levelName"></div><div id="winMsg"></div></div>
 </div>
+
+
+
 
 <!-- Editor UI -->
 <div id="editorUI" style="display:none">
@@ -76,11 +220,11 @@ button.small{padding:6px 8px;font-size:14px}
 <canvas id="editorCanvas" width="640" height="640"></canvas>
 <div class="row">
   <input type="text" id="levelNameInput" placeholder="Level Name">
-  <button id="saveLevelBtn">Save</button>
-  <button id="openLevelBtn">Open</button>
-  <button id="deleteLevelBtn">Delete</button>
-  <button id="playTestBtn">Play</button>
-  <button id="backFromEditorBtn">Back</button>
+  <button id="savelevelButton">Save</button>
+  <button id="openlevelButton">Open</button>
+  <button id="deletelevelButton">Delete</button>
+  <button id="playTestButton">Play</button>
+  <button id="backFromEditorButton">Back</button>
 </div>
 </div>
 
@@ -88,23 +232,21 @@ button.small{padding:6px 8px;font-size:14px}
 <div id="editorOpenSelect" style="display:none">
 <h1>Open Custom Level</h1>
 <div class="levels" id="editorOpenLevelsContainer"></div>
-<div style="margin-top:10px"><button id="backToEditorBtn">Back to Editor</button></div>
+<div style="margin-top:10px"><button id="backToEditorButton">Back to Editor</button></div>
 </div>
 
 </div>
 </div>
 
 <script>
-    const wallImage = new Image();
-    wallImage.src = 'images/wall.png'; 
-    const crateImage = new Image();
-    crateImage.src = 'images/crate.png';
-    const createImage = new Image();
-    wallImage.src = 'images/wall.png';
-    const characterImage = new Image();
-    characterImage.src = 'images/character_ghost.png';
-    const goalImage = new Image();
-    goalImage.src = 'images/goal.png';
+const wallImage = new Image();
+wallImage.src = 'images/wall.png'; 
+const crateImage = new Image();
+crateImage.src = 'images/crate.png';
+const characterImage = new Image();
+characterImage.src = 'images/character_ghost.png';
+const goalImage = new Image();
+goalImage.src = 'images/goal.png';
 
 // --- unsaved changes window warning ---
 let hasUnsavedChanges = false;
@@ -119,16 +261,37 @@ window.addEventListener("beforeunload", (e) => {
 
 // --- stock levels ---
 const LEVELS = [
-  {name: 'Level 1', map:["#####","#.@ #","# $ #","#   #","#####"]},
-  {name: 'Level 2', map:["  #####  ","  #   #  ","###$  #  ","# .#$ ###","#  .$  @#","#   #   #","#####   #","    #####"]},
-  {name: 'Level 3', map:["######","#.@$ #","# $$ #","# .. #","######"]}
+  {name: 'Level 1', map:[
+    "#####",
+    "#.@ #",
+    "# $ #",
+    "#   #",
+    "#####"]},
+  {name: 'Level 2', map:[
+    "  #####  ",
+    "  #   #  ",
+    "###$  #  ",
+    "# .#$ ###",
+    "#  .$  @#",
+    "#   #   #",
+    "#####   #",
+    "    #####"]},
+  {name: 'Level 3', map:[
+    "######",
+    "#.@$ #",
+    "# $$ #",
+    "# .. #",
+    "######"]},
 ];
 
 // --- parse, state, draw functions ---
 function parseLevel(raw){const rows = raw.map(r=>r.split(''));
   const h = rows.length, w = Math.max(...rows.map(r=>r.length));
   const grid = Array.from({length:h},()=>Array(w).fill(' ')); let player = {x:0,y:0};
-  for(let y=0;y<h;y++){for(let x=0;x<w;x++){const ch=(rows[y][x]||' ');
+  for(let y=0;y<h;y++){
+  for(let x=0;x<w;x++)
+  {
+    const ch=(rows[y][x]||' ');
     if(ch==='#') grid[y][x]='#'; else if(ch===' ') grid[y][x]='.';
     else if(ch==="@"){grid[y][x]='.';player={x,y};}
     else if(ch==="$"){grid[y][x]='$';} else if(ch==='.') grid[y][x]='.';
@@ -145,46 +308,82 @@ function makeState(level){
   }}
   return {grid:parsed.grid,player:parsed.player,crates,goals,h:parsed.h,w:parsed.w,moves:0,history:[]};
 }
-const canvas=document.getElementById('canvas'),ctx=canvas.getContext('2d'),tileSize=64;
-function draw(state)
-{
-    const W=state.w*tileSize,H=state.h*tileSize;
-    canvas.width=W;canvas.height=H;
-    ctx.clearRect(0,0,W,H);
-    for(let y=0;y<state.h;y++){for(let x=0;x<state.w;x++){
-    const ch=state.grid[y][x]||' ';
-    const px=x*tileSize,py=y*tileSize;
-    if(ch==='#')
-    {
-        ctx.drawImage(wallImage, px, py, tileSize, tileSize);
+function makeEditorState() {
+  const crates = [], goals = [];
+  let player = null;
+  for (let y = 0; y < editorGrid.length; y++) {
+    for (let x = 0; x < editorGrid[0].length; x++) {
+      const t = editorGrid[y][x];
+      if (t === '$') crates.push({x,y});
+      if (t === '.') goals.push({x,y});
+      if (t === '@') player = {x,y};
     }
-    else {ctx.fillStyle='#071627';ctx.fillRect(px,py,tileSize,tileSize);ctx.fillStyle='#0f172a';ctx.fillRect(px+6,py+6,tileSize-12,tileSize-12);}
-    }}
-    state.goals.forEach(g =>
-    {
-        const px = g.x * tileSize, py = g.y * tileSize;
-        ctx.drawImage(goalImage, px, py, tileSize, tileSize);
-    });
-    state.crates.forEach(c =>
-    {
-        const px = c.x * tileSize, py = c.y * tileSize;
-        ctx.drawImage(crateImage, px, py, tileSize, tileSize);
-    });
-    const p = state.player;
-    ctx.drawImage(characterImage, p.x * tileSize, p.y * tileSize, tileSize, tileSize);
+  }
+  return {
+    grid: editorGrid,
+    h: editorGrid.length,
+    w: editorGrid[0].length,
+    crates,
+    goals,
+    player
+  };
 }
+
+
+const canvas=document.getElementById('canvas'),ctx=canvas.getContext('2d'),tileSize=64;
+function DrawGrid(canvas, state) {
+  const ctx = canvas.getContext('2d');
+  const tileSize = 64;
+  const W = state.w * tileSize, H = state.h * tileSize;
+  canvas.width = W; canvas.height = H;
+  ctx.clearRect(0, 0, W, H);
+
+  for (let y = 0; y < state.h; y++) {
+    for (let x = 0; x < state.w; x++) {
+      const ch = state.grid[y][x] || ' ';
+      const px = x * tileSize, py = y * tileSize;
+
+      if (ch === '#') {
+        ctx.drawImage(wallImage, px, py, tileSize, tileSize);
+      } else {
+        ctx.fillStyle = '#071627';
+        ctx.fillRect(px, py, tileSize, tileSize);
+        ctx.fillStyle = '#0f172a';
+        ctx.fillRect(px + 6, py + 6, tileSize - 12, tileSize - 12);
+      }
+    }
+  }
+
+  state.goals?.forEach(g =>
+    ctx.drawImage(goalImage, g.x * tileSize, g.y * tileSize, tileSize, tileSize)
+  );
+
+  state.crates?.forEach(c =>
+    ctx.drawImage(crateImage, c.x * tileSize, c.y * tileSize, tileSize, tileSize)
+  );
+  state.crates?.forEach(c =>
+    ctx.drawImage(crateImage, c.x * tileSize, c.y * tileSize, tileSize, tileSize)
+  );
+  if (state.player) {
+    ctx.drawImage(characterImage, state.player.x * tileSize, state.player.y * tileSize, tileSize, tileSize);
+  }
+}
+
 function isWall(s,x,y){return(y<0||x<0||y>=s.h||x>=s.w)||(s.grid[y][x]==='#');}
 function crateAt(s,x,y){return s.crates.find(c=>c.x===x&&c.y===y);}
-function tryMove(s,dx,dy){const nx=s.player.x+dx,ny=s.player.y+dy;if(isWall(s,nx,ny))return false;
+function tryMove(s,dx,dy)
+{
+  const nx=s.player.x+dx,ny=s.player.y+dy;if(isWall(s,nx,ny))return false;
   const c=crateAt(s,nx,ny);if(!c){pushHistory(s);s.player.x=nx;s.player.y=ny;s.moves++;return true;}
   const nnx=nx+dx,nny=ny+dy;if(isWall(s,nnx,nny)||crateAt(s,nnx,nny))return false;
-  pushHistory(s);c.x=nnx;c.y=nny;s.player.x=nx;s.player.y=ny;s.moves++;return true;}
+  pushHistory(s);c.x=nnx;c.y=nny;s.player.x=nx;s.player.y=ny;s.moves++;return true;
+}
 function checkWin(s){return s.goals.every(g=>s.crates.some(c=>c.x===g.x&&c.y===g.y));}
 function pushHistory(s){s.history.push({player:{x:s.player.x,y:s.player.y},crates:s.crates.map(c=>({...c})),moves:s.moves});if(s.history.length>100)s.history.shift();}
 function undo(s){if(!s.history.length)return;const last=s.history.pop();s.player=last.player;s.crates=last.crates;s.moves=last.moves;}
 
 // --- UI flow ---
-let currentState=null,currentLevelIndex=0,currentIsCustom=false;
+let currentState=null,currentLevelIndex=0,currentIsCustom=false,gameMode=false;
 const mainMenu=document.getElementById('mainMenu');
 const levelSelect=document.getElementById('levelSelect');
 const customLevelSelect=document.getElementById('customLevelSelect');
@@ -194,19 +393,24 @@ const customLevelsContainer=document.getElementById('customLevelsContainer');
 const levelName=document.getElementById('levelName');
 const winMsg=document.getElementById('winMsg');
 const movesEl=document.getElementById('moves');
+const settingsUI = document.getElementById('settingsUI');
 
-function showMenu(){hideEverything();mainMenu.style.display='block';}
-function showLevelSelect(){hideEverything();levelSelect.style.display='block';}
-function showCustomLevelSelect(){hideEverything();customLevelSelect.style.display='block'}
-function showGame(){hideEverything();gameUI.style.display='block';}
-function hideEverything()
+function ShowMenu(){HideEverything();mainMenu.style.display='block';}
+function ShowLevelSelect(){HideEverything();levelSelect.style.display='block';}
+function ShowCustomLevelSelect(){HideEverything();customLevelSelect.style.display='block'}
+function ShowGame(){HideEverything();gameMode=true;gameUI.style.display='block';}
+function ShowEditor(){HideEverything(); editorUI.style.display='block';}
+function ShowSettings(){HideEverything();settingsUI.style.display = 'block';}
+function HideEverything()
 {
+  gameMode=false;
   mainMenu.style.display='none';
   levelSelect.style.display='none';
   customLevelSelect.style.display='none';
   gameUI.style.display='none';
   editorUI.style.display='none';
   editorOpenSelect.style.display='none';
+  settingsUI.style.display = 'none';
 }
 
 function loadLevel(index,isCustom=false)
@@ -218,10 +422,10 @@ function loadLevel(index,isCustom=false)
   levelName.textContent=src.name;
   winMsg.textContent='';
   movesEl.textContent='0';
-  draw(currentState);
-  showGame();
+  DrawGrid(canvas, currentState);
+  ShowGame();
 }
-function buildLevelButtons(){levelsContainer.innerHTML='';LEVELS.forEach((lev,i)=>{const b=document.createElement('div');b.className='levelBtn';b.textContent=lev.name;b.onclick=()=>loadLevel(i);levelsContainer.appendChild(b);});}
+function buildLevelButtons(){levelsContainer.innerHTML='';LEVELS.forEach((lev,i)=>{const b=document.createElement('div');b.className='levelButton';b.textContent=lev.name;b.onclick=()=>loadLevel(i);levelsContainer.appendChild(b);});}
 function getCustomLevels(){return JSON.parse(localStorage.getItem('custom_levels')||'[]');}
 function setCustomLevels(arr){localStorage.setItem('custom_levels',JSON.stringify(arr));}
 function buildCustomLevelButtons()
@@ -231,7 +435,7 @@ function buildCustomLevelButtons()
   arr.forEach((lev,i)=>
     {
       const b=document.createElement('div');
-      b.className='levelBtn';
+      b.className='levelButton';
       b.textContent=lev.name;
       b.onclick=()=>loadLevel(i,true);
       customLevelsContainer.appendChild(b);
@@ -240,21 +444,31 @@ function buildCustomLevelButtons()
 }
 
 // --- Event wiring stock/custom ---
-document.getElementById('playStockBtn').onclick=()=>{buildLevelButtons();showLevelSelect();};
-document.getElementById('playCustomBtn').onclick=()=>{buildCustomLevelButtons();showCustomLevelSelect();};
-document.getElementById('backToMenu1').onclick=()=>showMenu();
-document.getElementById('backToMenu2').onclick=()=>showMenu();
-document.getElementById('btnRestart').onclick=()=>loadLevel(currentLevelIndex,currentIsCustom);
-document.getElementById('btnUndo').onclick=()=>{if(currentState){undo(currentState);movesEl.textContent=currentState.moves;draw(currentState);}};
-document.getElementById('btnExit').onclick=()=>
+document.getElementById('playStockButton').onclick=()=>{buildLevelButtons();ShowLevelSelect();};
+document.getElementById('playCustomButton').onclick=()=>{buildCustomLevelButtons();ShowCustomLevelSelect();};
+document.getElementById('backToMenu1').onclick=()=>ShowMenu();
+document.getElementById('backToMenu2').onclick=()=>ShowMenu();
+document.getElementById('ButtonRestart').onclick=()=>loadLevel(currentLevelIndex,currentIsCustom);
+document.getElementById('ButtonUndo').onclick=()=>{if(currentState){undo(currentState);movesEl.textContent=currentState.moves;draw(currentState);}};
+document.getElementById('ButtonExit').onclick=()=>
 {
   gameUI.style.display = 'none';
-  currentIsCustom?showCustomLevelSelect():showLevelSelect();
+  currentIsCustom?ShowCustomLevelSelect():ShowLevelSelect();
 };
-document.getElementById('resetAll').onclick=()=>{localStorage.clear();alert('Progress cleared');};
+document.getElementById('settingsButton').onclick = () => {ShowSettings()};
+
+document.getElementById('backFromSettingsButton').onclick = () => {ShowMenu();};
+
+document.getElementById('clearStorageButton').onclick = () => {
+  localStorage.clear();
+  alert('All progress and custom levels cleared');
+};
+
 
 // keyboard
-window.addEventListener('keydown',e=>{
+window.addEventListener('keydown',e=>
+{
+  if(!gameMode) return;
   if(!currentState) return;
   let moved=false;
   if(['ArrowUp','w','W'].includes(e.key)) moved=tryMove(currentState,0,-1);
@@ -262,9 +476,9 @@ window.addEventListener('keydown',e=>{
   if(['ArrowLeft','a','A'].includes(e.key)) moved=tryMove(currentState,-1,0);
   if(['ArrowRight','d','D'].includes(e.key)) moved=tryMove(currentState,1,0);
   if(moved){movesEl.textContent=currentState.moves;
-  draw(currentState);
+  DrawGrid(canvas, currentState);
   if(checkWin(currentState)){winMsg.textContent='Level complete!';
-  setTimeout(()=>{alert('You win!');currentIsCustom?showCustomLevelSelect():showLevelSelect();},200);}}
+  setTimeout(()=>{alert('You win!');currentIsCustom?ShowCustomLevelSelect():ShowLevelSelect();},200);}}
 });
 
 // --- Editor ---
@@ -274,52 +488,79 @@ const ectx=editorCanvas.getContext('2d');
 const TILE_TYPES={'Wall':'#','Floor':' ','Goal':'.','Crate':'$','Player':'@'};
 let selectedTile='#';
 let editorGrid=Array.from({length:10},()=>Array(10).fill(' '));
-function drawEditor(){const size=64;editorCanvas.width=size*10;editorCanvas.height=size*10;
-  for(let y=0;y<10;y++){for(let x=0;x<10;x++){ectx.fillStyle='#071627';ectx.fillRect(x*size,y*size,size,size);ectx.fillStyle='#0f172a';ectx.fillRect(x*size+4,y*size+4,size-8,size-8);
-    const t=editorGrid[y][x];if(t==='#'){ectx.fillStyle='#888';ectx.fillRect(x*size+6,y*size+6,size-12,size-12);}
-    if(t==='.') {ectx.fillStyle=getComputedStyle(document.documentElement).getPropertyValue('--goal');ectx.beginPath();ectx.arc(x*size+size/2,y*size+size/2,size*0.16,0,Math.PI*2);ectx.fill();}
-    if(t==='$'){ectx.fillStyle=getComputedStyle(document.documentElement).getPropertyValue('--crate');ectx.fillRect(x*size+10,y*size+10,size-20,size-20);}
-    if(t==='@'){ectx.fillStyle=getComputedStyle(document.documentElement).getPropertyValue('--player');ectx.beginPath();ectx.arc(x*size+size/2,y*size+size/2,size*0.18,0,Math.PI*2);ectx.fill();}
-  }}}
-function setTileSelector(){const ts=document.getElementById('tileSelector');ts.innerHTML='';Object.entries(TILE_TYPES).forEach(([name,char])=>{const b=document.createElement('div');b.className='tileBtn';b.textContent=name;if(char===selectedTile)b.classList.add('active');
-  b.onclick=()=>{selectedTile=char;setTileSelector();};ts.appendChild(b);});}
-editorCanvas.onclick=(e)=>
+// function drawEditor(){const size=64;editorCanvas.width=size*10;editorCanvas.height=size*10;
+//   for(let y=0;y<10;y++){for(let x=0;x<10;x++){ectx.fillStyle='#071627';ectx.fillRect(x*size,y*size,size,size);ectx.fillStyle='#0f172a';ectx.fillRect(x*size+4,y*size+4,size-8,size-8);
+//     const t=editorGrid[y][x];if(t==='#'){ectx.fillStyle='#888';ectx.fillRect(x*size+6,y*size+6,size-12,size-12);}
+//     if(t==='.') {ectx.fillStyle=getComputedStyle(document.documentElement).getPropertyValue('--goal');ectx.beginPath();ectx.arc(x*size+size/2,y*size+size/2,size*0.16,0,Math.PI*2);ectx.fill();}
+//     if(t==='$'){ectx.fillStyle=getComputedStyle(document.documentElement).getPropertyValue('--crate');ectx.fillRect(x*size+10,y*size+10,size-20,size-20);}
+//     if(t==='@'){ectx.fillStyle=getComputedStyle(document.documentElement).getPropertyValue('--player');ectx.beginPath();ectx.arc(x*size+size/2,y*size+size/2,size*0.18,0,Math.PI*2);ectx.fill();}
+//   }}}
+function setTileSelector()
 {
-  const rect=editorCanvas.getBoundingClientRect();
-  const x=Math.floor((e.clientX-rect.left)/64);
-  const y=Math.floor((e.clientY-rect.top)/64);
-  editorGrid[y][x]=selectedTile;
-  drawEditor();
+  const ts=document.getElementById('tileSelector');ts.innerHTML='';
+  Object.entries(TILE_TYPES).forEach(([name,char])=>
+  {
+    const b=document.createElement('div');
+    b.className='tileButton';b.textContent=name;
+    if(char===selectedTile)b.classList.add('active');
+    b.onclick=()=>
+    {
+      selectedTile=char;
+      setTileSelector();
+    };
+    ts.appendChild(b);
+  });
+}
+editorCanvas.onclick = (e) => {
+  const rect = editorCanvas.getBoundingClientRect();
+  const x = Math.floor((e.clientX - rect.left) / 64);
+  const y = Math.floor((e.clientY - rect.top) / 64);
+
+  // If the selected tile is a player, remove any other players first.
+  if (selectedTile === '@') {
+    for (let row = 0; row < editorGrid.length; row++) {
+      for (let col = 0; col < editorGrid[row].length; col++) {
+        if (editorGrid[row][col] === '@') {
+          editorGrid[row][col] = ' '; // Replace old player with floor
+        }
+      }
+    }
+  }
+  
+  // Place the new tile at the clicked position.
+  editorGrid[y][x] = selectedTile;
+
+  DrawGrid(editorCanvas, makeEditorState());
   hasUnsavedChanges = true;
 
-  localStorage.setItem('editor_cache', JSON.stringify({
-    name: document.getElementById('levelNameInput').value.trim(),
-    map: editorGrid.map(r => r.join(''))
-  }));
+  // localStorage.setItem('editor_cache', JSON.stringify({
+  //   name: document.getElementById('levelNameInput').value.trim(),
+  //   map: editorGrid.map(r => r.join(''))
+  // }));
 };
 
-document.getElementById('editorBtn').onclick=()=>
+document.getElementById('editorButton').onclick=()=>
 {
-  const cache = JSON.parse(localStorage.getItem('editor_cache') || 'null');
-  if (cache) {
-    editorGrid = cache.map.map(r => r.split(''));
-    document.getElementById('levelNameInput').value = cache.name;
-  } else {
-    editorGrid = Array.from({ length: 10 }, () => Array(10).fill(' '));
-    document.getElementById('levelNameInput').value = '';
-  }
+  // const cache = JSON.parse(localStorage.getItem('editor_cache') || 'null');
+  // if (cache)
+  // {
+  //   editorGrid = cache.map.map(r => r.split(''));
+  //   document.getElementById('levelNameInput').value = cache.name;
+  // } else
+  // {
+  //   editorGrid = Array.from({ length: 10 }, () => Array(10).fill(' '));
+  //   document.getElementById('levelNameInput').value = '';
+  // }
 
-
-  editorGrid=Array.from({length:10},()=>Array(10).fill(' '));
   selectedTile='#';
   setTileSelector();
-  drawEditor();
-  hideEverything();
-  editorUI.style.display='block';
+
+  DrawGrid(editorCanvas, makeEditorState());
+  ShowEditor();
 };
 
-document.getElementById('backFromEditorBtn').onclick=()=>showMenu();
-document.getElementById('saveLevelBtn').onclick=()=>
+document.getElementById('backFromEditorButton').onclick=()=>ShowMenu();
+document.getElementById('savelevelButton').onclick=()=>
 {
   const name=document.getElementById('levelNameInput').value.trim();
   if(!name)return alert('Enter name');
@@ -336,11 +577,30 @@ document.getElementById('saveLevelBtn').onclick=()=>
 // --- Editor open select screen ---
 const editorOpenSelect=document.getElementById('editorOpenSelect');
 const editorOpenLevelsContainer=document.getElementById('editorOpenLevelsContainer');
-document.getElementById('openLevelBtn').onclick=()=>{buildEditorOpenButtons();editorUI.style.display='none';editorOpenSelect.style.display='block';};
-document.getElementById('backToEditorBtn').onclick=()=>{editorOpenSelect.style.display='none';editorUI.style.display='block';};
-function buildEditorOpenButtons(){editorOpenLevelsContainer.innerHTML='';const arr=getCustomLevels();arr.forEach((lev)=>{const b=document.createElement('div');b.className='levelBtn';b.textContent=lev.name;b.onclick=()=>{editorGrid=lev.map.map(r=>r.split(''));document.getElementById('levelNameInput').value=lev.name;drawEditor();editorOpenSelect.style.display='none';editorUI.style.display='block';};editorOpenLevelsContainer.appendChild(b);});}
+document.getElementById('openlevelButton').onclick=()=>{buildEditorOpenButtons();editorUI.style.display='none';editorOpenSelect.style.display='block';};
+document.getElementById('backToEditorButton').onclick=()=>{editorOpenSelect.style.display='none';editorUI.style.display='block';};
+function buildEditorOpenButtons()
+{
+  editorOpenLevelsContainer.innerHTML='';
+  const arr=getCustomLevels();
+  arr.forEach((lev)=>
+  {
+    const b=document.createElement('div');
+    b.className='levelButton';b.textContent=lev.name;
+    b.onclick=()=>
+    {
+      editorGrid=lev.map.map(r=>r.split(''));
+      document.getElementById('levelNameInput').value=lev.name;
 
-document.getElementById('deleteLevelBtn').onclick=()=>
+      DrawGrid(editorCanvas, makeEditorState());
+      editorOpenSelect.style.display='none';
+      editorUI.style.display='block';
+    };
+    editorOpenLevelsContainer.appendChild(b);
+  });
+}
+
+document.getElementById('deletelevelButton').onclick=()=>
 {
   const name=document.getElementById('levelNameInput').value.trim();
   if(!name)return;
@@ -352,10 +612,11 @@ document.getElementById('deleteLevelBtn').onclick=()=>
   // wipe editor
   editorGrid = Array.from({ length: 10 }, () => Array(10).fill(' '));
   document.getElementById('levelNameInput').value = "";
-  drawEditor();
+
+  DrawGrid(editorCanvas, makeEditorState());
 
 };
-document.getElementById('playTestBtn').onclick=()=>
+document.getElementById('playTestButton').onclick=()=>
 {
   const name=document.getElementById('levelNameInput').value.trim()||'Untitled';
   const map=editorGrid.map(r=>r.join(''));
@@ -363,13 +624,13 @@ document.getElementById('playTestBtn').onclick=()=>
   levelName.textContent=name;
   movesEl.textContent='0';
   winMsg.textContent='';
-  draw(currentState);
-  showGame();
+  DrawGrid(canvas, currentState);
+  ShowGame();
   currentIsCustom=false;
 };
 
 // start menu
-showMenu();
+ShowMenu();
 </script>
 </body>
 </html>
