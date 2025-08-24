@@ -449,7 +449,13 @@ document.getElementById('playCustomButton').onclick=()=>{buildCustomLevelButtons
 document.getElementById('backToMenu1').onclick=()=>ShowMenu();
 document.getElementById('backToMenu2').onclick=()=>ShowMenu();
 document.getElementById('ButtonRestart').onclick=()=>loadLevel(currentLevelIndex,currentIsCustom);
-document.getElementById('ButtonUndo').onclick=()=>{if(currentState){undo(currentState);movesEl.textContent=currentState.moves;draw(currentState);}};
+document.getElementById('ButtonUndo').onclick=()=>
+{
+  if(!currentState) return;
+  undo(currentState);
+  movesEl.textContent=currentState.moves;
+  DrawGrid(canvas,currentState);
+};
 document.getElementById('ButtonExit').onclick=()=>
 {
   gameUI.style.display = 'none';
