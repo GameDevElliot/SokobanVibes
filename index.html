@@ -47,6 +47,12 @@
     align-items: center;
     flex-wrap: wrap;
   }
+.column {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    align-items: flex-start;
+}
   
   h1 {
     margin: 0 0 12px 0;
@@ -144,7 +150,7 @@
     background: #08101a;
     color: #ff0000;
     font-weight: bold;
-    border: 3px solid rgb(255, 183, 0);
+    border: 2px solid rgb(255, 183, 0);
     padding: 8px 12px;
     border-radius: 8px;
     cursor: pointer;
@@ -153,92 +159,121 @@
 </head>
 <body>
 <div class="wrap">
-<div class="ui" id="ui">
+    <div class="ui" id="ui">
 
-<!-- Main Menu -->
-<div id="mainMenu">
-<h1>Sokoban Vibes</h1>
-<h2>Vibe-coded sokoban puzzle with level editor and local storage</h2>
-<div class="row" style="justify-content:space-between">
-  <div>
-    <button id="playStockButton">Play Stock Levels</button>
-    <button id="playCustomButton">Play Custom Levels</button>
-    <button id="editorButton">Level Editor</button>
-  </div>
-  <div>
-    <button id="settingsButton">⚙️Settings</button>
-  </div>
-</div>
-<p class="hint">Use arrow keys or WASD. Push crates onto green goals.</p>
-</div>
+        <!-- Main Menu -->
+        <div id="mainMenu">
+            <h1>Sokoban Vibes</h1>
+            <h2>Vibe-coded sokoban puzzle with level editor and local storage</h2>
+            <div class="row" style="justify-content:space-between">
+                <div>
+                    <button id="playStockButton">Play Stock Levels</button>
+                    <button id="playCustomButton">Play Custom Levels</button>
+                    <button id="editorButton">Level Editor</button>
+                </div>
+                <div>
+                    <button id="settingsButton">⚙️Settings</button>
+                </div>
+            </div>
+            <p class="hint">Use arrow keys or WASD. Push crates onto green goals.</p>
+        </div>
 
-<!-- Settings UI -->
-<div id="settingsUI" style="display:none">
-  <h1>Settings</h1>
-  <div class="row">
-    <button id="clearStorageButton">Clear Local Storage</button>
-    <button id="backFromSettingsButton">Back</button>
-  </div>
-  <p class="hint">⚠ This will erase all saved custom levels and progress.</p>
-</div>
+        <!-- Settings UI -->
+        <div id="settingsUI" style="display:none">
+            <h1>Settings</h1>
+            <div class="column">
 
-<!-- Stock Level Select -->
-<div id="levelSelect" style="display:none">
-<h1>Select a Stock Level</h1>
-<div class="levels" id="levelsContainer"></div>
-<div style="margin-top:10px"><button id="backToMenu1">Back</button></div>
-</div>
+                <div class="row">
+                    <label for="themeColorPicker" style="color:#cfe9f3">Theme Colour:</label>
+                    <input type="color" id="themeColorPicker" value="#0b1220">
+                </div>
 
-<!-- Custom Level Select -->
-<div id="customLevelSelect" style="display:none">
-<h1>Select a Custom Level</h1>
-<div class="levels" id="customLevelsContainer"></div>
-<div style="margin-top:10px"><button id="backToMenu2">Back</button></div>
-</div>
+                <div class="row">
+                    <button id="clearStorageButton">Clear Local Storage</button>
+                    <p class="hint" style="margin:0; flex:1">
+                        ⚠ This will erase all saved custom levels and progress.
+                    </p>
+                </div>
+                <div class="row" style="justify-content:flex-end; margin-top:12px;">
+                    <button id="backFromSettingsButton">Back</button>
+                </div>
 
-<!-- Game UI -->
-<div id="gameUI" style="display:none">
-<div class="row" style="justify-content:space-between">
-  <div>
-    <button id="ButtonRestart">Restart</button>
-    <button id="ButtonUndo">Undo</button>
-    <button id="ButtonExit">Exit</button>
-  </div>
-  <div style="color:#cfe9f3">Moves: <span id="moves">0</span></div>
-</div>
-<canvas id="canvas" width="640" height="640"></canvas>
-<div class="foot"><div id="levelName"></div><div id="winMsg"></div></div>
-</div>
+            </div>
+        </div>
+
+        <!-- Stock Level Select -->
+        <div id="levelSelect" style="display:none">
+            <h1>Select a Stock Level</h1>
+            <div class="levels" id="levelsContainer"></div>
+            <div style="margin-top:10px"><button id="backToMenu1">Back</button></div>
+        </div>
+
+        <!-- Custom Level Select -->
+        <div id="customLevelSelect" style="display:none">
+            <h1>Select a Custom Level</h1>
+            <div class="levels" id="customLevelsContainer"></div>
+            <div style="margin-top:10px"><button id="backToMenu2">Back</button></div>
+        </div>
+
+        <!-- Game UI -->
+        <div id="gameUI" style="display:none">
+            <div class="row" style="justify-content:space-between">
+                <div>
+                    <button id="ButtonRestart">Restart</button>
+                    <button id="ButtonUndo">Undo</button>
+                    <button id="ButtonExit">Main Menu</button>
+                    <button id="StopPlayTest">Return to Editor</button>
+                </div>
+                <div style="color:#cfe9f3">Moves: <span id="moves">0</span></div>
+            </div>
+            <canvas id="canvas" width="640" height="640"></canvas>
+            <div class="foot"><div id="levelName"></div><div id="winMsg"></div></div>
+        </div>
 
 
 
 
-<!-- Editor UI -->
-<div id="editorUI" style="display:none">
-<h1>Level Editor (10×10)</h1>
-<div class="tileSelector" id="tileSelector"></div>
-<canvas id="editorCanvas" width="640" height="640"></canvas>
-<div class="row">
-  <input type="text" id="levelNameInput" placeholder="Level Name">
-  <button id="savelevelButton">Save</button>
-  <button id="openlevelButton">Open</button>
-  <button id="deletelevelButton">Delete</button>
-  <button id="playTestButton">Play</button>
-  <button id="backFromEditorButton">Back</button>
-</div>
-</div>
+        <!-- Editor UI -->
+        <div id="editorUI" style="display:none">
+            <h1>Level Editor (10×10)</h1>
+            <div class="tileSelector" id="tileSelector"></div>
+            <canvas id="editorCanvas" width="640" height="640"></canvas>
+            <div class="row">
+                <input type="text" id="levelNameInput" placeholder="Level Name">
+                <button id="savelevelButton">Save</button>
+                <button id="openlevelButton">Open</button>
+                <button id="deletelevelButton">Delete</button>
+                <button id="playTestButton">Play</button>
+                <button id="backFromEditorButton">Back</button>
+            </div>
+        </div>
 
-<!-- Editor Open Level Select -->
-<div id="editorOpenSelect" style="display:none">
-<h1>Open Custom Level</h1>
-<div class="levels" id="editorOpenLevelsContainer"></div>
-<div style="margin-top:10px"><button id="backToEditorButton">Back to Editor</button></div>
-</div>
+        <!-- Editor Open Level Select -->
+        <div id="editorOpenSelect" style="display:none">
+            <h1>Open Custom Level</h1>
+            <div class="levels" id="editorOpenLevelsContainer"></div>
+            <div style="margin-top:10px"><button id="backToEditorButton">Back to Editor</button></div>
+        </div>
 
-</div>
+        <!-- Confirm Clear Popup -->
+        <div id="confirmPopup" style="display:none;
+  position: fixed; inset: 0; background: rgba(0,0,0,0.6); align-items: center; justify-content: center;">
+            <div style="background:#0b1220; padding:20px; border-radius:12px; text-align:center; width:300px; box-shadow:0 8px 20px rgba(0,0,0,0.7)">
+                <h2 style="color:#ff5555; margin-bottom:10px;">Are you sure?</h2>
+                <p style="color:#cfe9f3; font-size:14px;">⚠ This will erase all saved levels and progress.</p>
+                <div style="margin-top:15px; display:flex; gap:10px; justify-content:center;">
+                    <button id="confirmYes">Yes, clear</button>
+                    <button id="confirmNo">Cancel</button>
+                </div>
+            </div>
+        </div>
+
+    </div>
 </div>
 
 <script>
+    const root = document.documentElement;
+
 const wallImage = new Image();
 wallImage.src = 'images/wall.png'; 
 const crateImage = new Image();
@@ -383,6 +418,7 @@ function pushHistory(s){s.history.push({player:{x:s.player.x,y:s.player.y},crate
 function undo(s){if(!s.history.length)return;const last=s.history.pop();s.player=last.player;s.crates=last.crates;s.moves=last.moves;}
 
 // --- UI flow ---
+
 let currentState=null,currentLevelIndex=0,currentIsCustom=false,gameMode=false;
 const mainMenu=document.getElementById('mainMenu');
 const levelSelect=document.getElementById('levelSelect');
@@ -398,7 +434,19 @@ const settingsUI = document.getElementById('settingsUI');
 function ShowMenu(){HideEverything();mainMenu.style.display='block';}
 function ShowLevelSelect(){HideEverything();levelSelect.style.display='block';}
 function ShowCustomLevelSelect(){HideEverything();customLevelSelect.style.display='block'}
-function ShowGame(){HideEverything();gameMode=true;gameUI.style.display='block';}
+function ShowGame(fromEditor)
+{
+    if (fromEditor) {
+        document.getElementById('ButtonExit').style.display = 'none';
+        document.getElementById('StopPlayTest').style.display = 'inline-block';
+    } else {
+        document.getElementById('ButtonExit').style.display = 'inline-block';
+        document.getElementById('StopPlayTest').style.display = 'none';
+    }
+    HideEverything();
+    gameMode = true;
+    gameUI.style.display = 'block';
+}
 function ShowEditor(){HideEverything(); editorUI.style.display='block';}
 function ShowSettings(){HideEverything();settingsUI.style.display = 'block';}
 function HideEverything()
@@ -423,7 +471,7 @@ function loadLevel(index,isCustom=false)
   winMsg.textContent='';
   movesEl.textContent='0';
   DrawGrid(canvas, currentState);
-  ShowGame();
+  ShowGame(false);
 }
 function buildLevelButtons(){levelsContainer.innerHTML='';LEVELS.forEach((lev,i)=>{const b=document.createElement('div');b.className='levelButton';b.textContent=lev.name;b.onclick=()=>loadLevel(i);levelsContainer.appendChild(b);});}
 function getCustomLevels(){return JSON.parse(localStorage.getItem('custom_levels')||'[]');}
@@ -443,7 +491,9 @@ function buildCustomLevelButtons()
   );
 }
 
-// --- Event wiring stock/custom ---
+    // --- Event wiring stock/custom ---
+
+document.getElementById('themeColorPicker').addEventListener('input', (e) => { root.style.setProperty('--bg', e.target.value); });
 document.getElementById('playStockButton').onclick=()=>{buildLevelButtons();ShowLevelSelect();};
 document.getElementById('playCustomButton').onclick=()=>{buildCustomLevelButtons();ShowCustomLevelSelect();};
 document.getElementById('backToMenu1').onclick=()=>ShowMenu();
@@ -456,18 +506,28 @@ document.getElementById('ButtonUndo').onclick=()=>
   movesEl.textContent=currentState.moves;
   DrawGrid(canvas,currentState);
 };
-document.getElementById('ButtonExit').onclick=()=>
-{
-  gameUI.style.display = 'none';
-  currentIsCustom?ShowCustomLevelSelect():ShowLevelSelect();
-};
+document.getElementById('ButtonExit').onclick = () => { ShowMenu() };
+document.getElementById('StopPlayTest').onclick = () => { ShowEditor() };
 document.getElementById('settingsButton').onclick = () => {ShowSettings()};
+document.getElementById('backFromSettingsButton').onclick = () => { ShowMenu(); };
 
-document.getElementById('backFromSettingsButton').onclick = () => {ShowMenu();};
 
-document.getElementById('clearStorageButton').onclick = () => {
-  localStorage.clear();
-  alert('All progress and custom levels cleared');
+const confirmPopup = document.getElementById("confirmPopup");
+const confirmYes = document.getElementById("confirmYes");
+const confirmNo = document.getElementById("confirmNo");
+
+document.getElementById("clearStorageButton").onclick = () => {
+    confirmPopup.style.display = "flex";
+};
+
+confirmYes.onclick = () => {
+    localStorage.clear();
+    confirmPopup.style.display = "none";
+    alert("All progress and custom levels cleared");
+};
+
+confirmNo.onclick = () => {
+    confirmPopup.style.display = "none";
 };
 
 
@@ -631,7 +691,7 @@ document.getElementById('playTestButton').onclick=()=>
   movesEl.textContent='0';
   winMsg.textContent='';
   DrawGrid(canvas, currentState);
-  ShowGame();
+  ShowGame(true);
   currentIsCustom=false;
 };
 
