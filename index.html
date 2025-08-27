@@ -175,20 +175,35 @@
                     "######"]
             },
             {
-                "name": "A Big Mess",
+                "name": "Messy",
                 "map": [
-                    "   #..    ",
-                    " @   # #  ",
-                    "  $$ $ #  ",
-                    "     #.#  ",
-                    "   $.# #  ",
-                    " #  ##$#  ",
-                    ". $   $  #",
-                    "###### $#.",
-                    ".         ",
-                    ".      #  "
+                    ".  #..   .",
+                    " @$  # #  ",
+                    " $$$ $ #  ",
+                    "    $#.#$ ",
+                    " $ $.# #  ",
+                    " #$ ##$#  ",
+                    ".   $    .",
+                    "# ####.###",
+                    ".        .",
+                    ".     #   "
                 ]
             },
+            {
+                "name": "Boxed In",
+                "map": [
+                    ".  . $ . .",
+                    "$$$ $$$ $$",
+                    ".$$ $$$ $$",
+                    " $$$$   $$",
+                    ".  $@$$ $$",
+                    " $$$$  $ $",
+                    "$$$ $$ $ $",
+                    ".     $ $.",
+                    " $$ $$ $ $",
+                    ".$$$$$.$$$"
+                ]
+                }
         ];
 
         // --- parse, state, draw functions ---
@@ -288,7 +303,10 @@
             pushHistory(s); c.x = nnx; c.y = nny; s.player.x = nx; s.player.y = ny; s.moves++; return true;
         }
         function checkWin(s) { return s.goals.every(g => s.crates.some(c => c.x === g.x && c.y === g.y)); }
-        function pushHistory(s) { s.history.push({ player: { x: s.player.x, y: s.player.y }, crates: s.crates.map(c => ({ ...c })), moves: s.moves }); if (s.history.length > 100) s.history.shift(); }
+        function pushHistory(s)
+        {
+            s.history.push({ player: { x: s.player.x, y: s.player.y }, crates: s.crates.map(c => ({ ...c })), moves: s.moves });
+        }
         function undo(s) { if (!s.history.length) return; const last = s.history.pop(); s.player = last.player; s.crates = last.crates; s.moves = last.moves; }
 
         // --- UI flow ---
@@ -422,24 +440,26 @@
             if (['ArrowDown', 's', 'S'].includes(e.key)) moved = tryMove(currentState, 0, 1);
             if (['ArrowLeft', 'a', 'A'].includes(e.key)) moved = tryMove(currentState, -1, 0);
             if (['ArrowRight', 'd', 'D'].includes(e.key)) moved = tryMove(currentState, 1, 0);
-            if (moved) {
-                movesEl.textContent = currentState.moves;
-                DrawGrid(canvas, currentState);
-                if (checkWin(currentState)) {
-                    winMsg.textContent = 'Level complete!';
-                    setTimeout(() => {
-                        alert('You win!');
-                        if (cameFromEditor) {
-                            ShowEditor();
-                        } else if (currentIsCustom) {
-                            ShowCustomLevelSelect();
-                        } else {
-                            ShowLevelSelect();
-                        }
-                    }, 200);
-                }
-            }
+            if (moved)(HandleWinCondition())
         });
+        function HandleWinCondition()
+        {
+            movesEl.textContent = currentState.moves;
+            DrawGrid(canvas, currentState);
+            if (checkWin(currentState)) {
+                winMsg.textContent = 'Level complete!';
+                setTimeout(() => {
+                    alert('You win!');
+                    if (cameFromEditor) {
+                        ShowEditor();
+                    } else if (currentIsCustom) {
+                        ShowCustomLevelSelect();
+                    } else {
+                        ShowLevelSelect();
+                    }
+                }, 200);
+            }
+        }
 
         // --- Editor ---
         const editorUI = document.getElementById('editorUI');
@@ -495,22 +515,31 @@
         }
 
         editorCanvas.onclick = (e) => {
+            let changes = [];
             const rect = editorCanvas.getBoundingClientRect();
             const x = Math.floor((e.clientX - rect.left) / 64);
             const y = Math.floor((e.clientY - rect.top) / 64);
-
             // If the selected tile is a player, remove any other players first.
             if (selectedTile === '@') {
                 for (let row = 0; row < editorGrid.length; row++) {
                     for (let col = 0; col < editorGrid[row].length; col++) {
-                        if (editorGrid[row][col] === '@') {
+                        if (editorGrid[row][col] === '@')
+                        {
+                            changes.push({ x: col, y: row, prev: '@', next: ' ' });
                             editorGrid[row][col] = ' '; // Replace old player with floor
                         }
                     }
                 }
             }
 
+
             // Place the new tile at the clicked position.
+            changes.push({ x, y, prev: editorGrid[y][x], next: selectedTile });
+
+            if (changes.length > 0)
+            {
+                commitEditorChange(changes);
+            }
             editorGrid[y][x] = selectedTile;
 
             DrawGrid(editorCanvas, makeEditorState());
@@ -521,6 +550,51 @@
             //   map: editorGrid.map(r => r.join(''))
             // }));
         };
+        let undoStack = [];
+        let redoStack = [];
+        function clearEditorHistory() {
+            undoStack = [];
+            redoStack = [];
+        }
+
+        function commitEditorChange(changes) {
+            undoStack.push({ changes });
+            redoStack = []; // clear redo history
+        }
+
+        function undoEditor() {
+            if (!undoStack.length) return;
+            const tx = undoStack.pop();
+            tx.changes.forEach(c => {
+                editorGrid[c.y][c.x] = c.prev;
+            });
+            redoStack.push(tx);
+            DrawGrid(editorCanvas, makeEditorState());
+        }
+
+        function redoEditor() {
+            if (!redoStack.length) return;
+            const tx = redoStack.pop();
+            tx.changes.forEach(c => {
+                editorGrid[c.y][c.x] = c.next;
+            });
+            undoStack.push(tx);
+            DrawGrid(editorCanvas, makeEditorState());
+        }
+        window.addEventListener('keydown', e => {
+            if (gameMode) return; // editor only
+
+            if (e.ctrlKey && e.key === 'z')
+            {
+
+                undoEditor();
+                e.preventDefault();
+            }
+            if (e.ctrlKey && e.key === 'y') {
+                redoEditor();
+                e.preventDefault();
+            }
+        });
 
         document.getElementById('editorButton').onclick = () => {
             // const cache = JSON.parse(localStorage.getItem('editor_cache') || 'null');
@@ -558,7 +632,13 @@
         // --- Editor open select screen ---
         const editorOpenSelect = document.getElementById('editorOpenSelect');
         const editorOpenLevelsContainer = document.getElementById('editorOpenLevelsContainer');
-        document.getElementById('openlevelButton').onclick = () => { buildEditorOpenButtons(); editorUI.style.display = 'none'; editorOpenSelect.style.display = 'block'; };
+        document.getElementById('openlevelButton').onclick = () =>
+        {
+            clearEditorHistory();
+            buildEditorOpenButtons();
+            editorUI.style.display = 'none';
+            editorOpenSelect.style.display = 'block';
+        };
         document.getElementById('backToEditorButton').onclick = () => { editorOpenSelect.style.display = 'none'; editorUI.style.display = 'block'; };
         function buildEditorOpenButtons() {
             editorOpenLevelsContainer.innerHTML = '';
