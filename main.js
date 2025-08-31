@@ -54,6 +54,7 @@ function makeState(level) {
 const canvas = document.getElementById('canvas'), ctx = canvas.getContext('2d'), tileSize = 64;
 function DrawGrid(canvas, state) {
     const ctx = canvas.getContext('2d');
+    ctx.imageSmoothingEnabled = false;
     const tileSize = 64;
     const W = state.w * tileSize, H = state.h * tileSize;
     canvas.width = W; canvas.height = H;
@@ -426,6 +427,7 @@ function makeEditorState() {
 const editorUI = document.getElementById('editorUI');
 const editorCanvas = document.getElementById('editorCanvas');
 const ectx = editorCanvas.getContext('2d');
+ectx.imageSmoothingEnabled = false;
 const TILE_TYPES = { 'Wall': '#', 'Floor': ' ', 'Goal': '.', 'Crate': '$', 'Player': '@' };
 let selectedTile = '#';
 let editorGrid = Array.from({ length: 10 }, () => Array(10).fill(' '));

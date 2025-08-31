@@ -16,14 +16,18 @@ html, body {
 }
 
 .wrap {
-  height: 100%;
+  min-height: 100vh; /* full viewport height */
   display: flex;
-  align-items: center;
+  align-items: flex-start; /* allow content to start at top */
   justify-content: center;
+  padding: 20px; /* give space for scrollbars */
+  box-sizing: border-box;
+  overflow-y: auto; /* let the whole page scroll if needed */
 }
 
 .ui {
   width: 800px;
+  max-width: 100%; /* prevent overflowing on small screens */
   background: linear-gradient(
     180deg,
     rgba(255, 255, 255, 0.03),
@@ -32,6 +36,7 @@ html, body {
   border-radius: 12px;
   padding: 20px;
   box-shadow: 0 10px 30px rgba(2, 6, 23, 0.6);
+  overflow: auto; /* allow scrolling inside UI if content grows */
 }
 
 .row {
