@@ -8,6 +8,10 @@ const characterImage = new Image();
 characterImage.src = 'images/character_ghost.png';
 const goalImage = new Image();
 goalImage.src = 'images/goal.png';
+const sock1Image = new Image();
+sock1Image.src = 'images/sock1.png';
+const sock2Image = new Image();
+sock2Image.src = 'images/sock2.png';
 
 // --- unsaved changes window warning ---
 let hasUnsavedChanges = false;
@@ -18,9 +22,6 @@ window.addEventListener("beforeunload", (e) => {
         return "";                      // for older browsers
     }
 });
-
-
-// --- stock levels ---
 
 // --- parse, state, draw functions ---
 function parseLevel(raw) {
@@ -43,7 +44,7 @@ function makeState(level) {
     for (let y = 0; y < parsed.h; y++) {
         for (let x = 0; x < parsed.w; x++) {
             const ch = level.map[y][x] || ' ';
-            if (ch === '$' || ch === '*') crates.push({ x, y });
+            if (ch === '$' || ch === '*') crates.push({ x, y,type: Math.floor(Math.random() * 2) });
             if (ch === '.' || ch === '*') goals.push({ x, y });
         }
     }
@@ -78,12 +79,10 @@ function DrawGrid(canvas, state) {
         ctx.drawImage(goalImage, g.x * tileSize, g.y * tileSize, tileSize, tileSize)
     );
 
-    state.crates?.forEach(c =>
-        ctx.drawImage(crateImage, c.x * tileSize, c.y * tileSize, tileSize, tileSize)
-    );
-    state.crates?.forEach(c =>
-        ctx.drawImage(crateImage, c.x * tileSize, c.y * tileSize, tileSize, tileSize)
-    );
+    state.crates?.forEach(c =>{
+        const img = (c.type === 0 ? sock1Image : sock2Image);
+        ctx.drawImage(img, c.x * tileSize, c.y * tileSize, tileSize, tileSize)
+    });
     if (state.player) {
         ctx.drawImage(characterImage, state.player.x * tileSize, state.player.y * tileSize, tileSize, tileSize);
     }
