@@ -80,6 +80,7 @@ button.small {
   display: block;
   margin: 14px auto;
   border-radius: 8px;
+  touch-action: none
 }
 
 .center {

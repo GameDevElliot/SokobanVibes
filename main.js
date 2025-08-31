@@ -179,7 +179,17 @@ function LoadNextLevel() {
     // load via your existing loader
     loadLevel(nextIndex, currentIsCustom);
 }
-function buildLevelButtons() {
+function buildLevelButtons()
+{
+    // tutorialsContainer.innerHTML = '';
+    // TUTORIAL_LEVELS.forEach((lev, i) => {
+    //     const b = document.createElement('button'); // changed from 'div' to 'button'
+    //     b.className = 'levelButton';
+    //     b.textContent = lev.name;
+    //     b.onclick = () => loadLevel(i);
+    //     tutorialsContainer.appendChild(b);
+    // });
+
     levelsContainer.innerHTML = '';
     LEVELS.forEach((lev, i) => {
         const b = document.createElement('button'); // changed from 'div' to 'button'
@@ -284,7 +294,24 @@ function RestartLevel() {
         loadLevel(currentLevelIndex, currentIsCustom);
     }
 }
-
+// Touch
+let startX, startY;
+canvas.addEventListener("touchstart", e => {
+    console.log("touch start");
+  const t = e.touches[0];
+  startX = t.clientX;
+  startY = t.clientY;
+});
+canvas.addEventListener("touchend", e => {
+  const t = e.changedTouches[0];
+  const dx = t.clientX - startX;
+  const dy = t.clientY - startY;
+  if (Math.abs(dx) > Math.abs(dy)) {
+    if (dx > 30) tryMove(currentState, 1,0); else if (dx < -30) tryMove(currentState, -1,0);
+  } else {
+    if (dy > 30) tryMove(currentState, 0,1); else if (dy < -30) tryMove(currentState, 0,-1);
+  }
+});
 
 // keyboard
 window.addEventListener('keydown', e => {

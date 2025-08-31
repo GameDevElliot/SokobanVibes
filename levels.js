@@ -1,3 +1,25 @@
+const TUTORIAL_LEVELS = [
+    {
+        name: 'Tutorial 1',
+        map: [
+            "#######",
+            "#@ $ .#",
+            "#######",
+        ]
+    },
+    {
+        name: 'Tutorial 2',
+        map: [
+            "  ####",
+            "###  #",
+            "#@ $ #",
+            "####.#",
+            "   ###",
+        ]
+    }
+];
+
+
 const LEVELS = [
     {
         name: 'Level 1', map: [

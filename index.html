@@ -3,9 +3,9 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>Sokoban — Playable + Editor</title>
+    <title>Sock-O-Bin + Editor</title>
     <link rel="stylesheet" href="style.css">
-    <link rel="icon" type="image/png" href="images/crate.png">
+    <link rel="icon" type="image/png" href="images/sock1.png">
 </head>
 <body>
     <div class="wrap">
@@ -13,19 +13,19 @@
 
             <!-- Main Menu -->
             <div id="mainMenu">
-                <h1>Sokoban Vibes</h1>
-                <h2>Vibe-coded sokoban puzzle with level editor and local storage</h2>
+                <h1>Sock-O-Bin</h1>
+                <h2>Vibe-coded sokoban style puzzle with level editor and local storage</h2>
                 <div class="row" style="justify-content:space-between">
                     <div>
-                        <button id="playStockButton">🧩 Play Stock Levels</button>
-                        <button id="playCustomButton">🧩 Play Custom Levels</button>
+                        <button id="playStockButton">🧦 Play Stock Levels</button>
+                        <button id="playCustomButton">🧦 Play Custom Levels</button>
                         <button id="editorButton">✏️ Level Editor</button>
                     </div>
                     <div>
                         <button id="settingsButton">⚙️ Settings</button>
                     </div>
                 </div>
-                <p class="hint">Use arrow keys or WASD. Push crates onto green goals.</p>
+                <p class="hint">Use arrow keys or WASD. Push socks onto targets to win.</p>
             </div>
 
             <!-- Settings UI -->
@@ -54,6 +54,7 @@
             <!-- Stock Level Select -->
             <div id="levelSelect" style="display:none">
                 <h1>Select a Stock Level</h1>
+                <!-- <div class="levels" id="tutorialsContainer"></div> -->
                 <div class="levels" id="levelsContainer"></div>
                 <div style="margin-top:10px"><button id="backToMenu1">⬅️ Back</button></div>
             </div>
