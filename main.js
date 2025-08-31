@@ -261,7 +261,15 @@ document.getElementById("returnToEditorButton").onclick = () => {
     ShowEditor();
 };
 
+function handleMove(dx, dy) {
+    if (!gameMode || !currentState) return;
+    if (tryMove(currentState, dx, dy)) HandleWinCondition();
+}
 
+// document.getElementById('btnUp').addEventListener('touchstart', () => handleMove(0, -1));
+// document.getElementById('btnDown').addEventListener('touchstart', () => handleMove(0, 1));
+// document.getElementById('btnLeft').addEventListener('touchstart', () => handleMove(-1, 0));
+// document.getElementById('btnRight').addEventListener('touchstart', () => handleMove(1, 0));
 
 const confirmPopup = document.getElementById("confirmPopup");
 const confirmYes = document.getElementById("confirmYes");
@@ -316,6 +324,52 @@ window.addEventListener("touchend", e => {
     }
     if (moved)(HandleWinCondition())
 });
+//mouse
+
+let moveIntervalId = null;
+
+canvas.onclick = e => {
+    if (!gameMode || !currentState) return;
+
+    // Cancel any ongoing movement
+    if (moveIntervalId !== null) {
+        clearTimeout(moveIntervalId);
+        moveIntervalId = null;
+    }
+
+    const rect = canvas.getBoundingClientRect();
+    const targetX = Math.floor((e.clientX - rect.left) / tileSize);
+    const targetY = Math.floor((e.clientY - rect.top) / tileSize);
+
+    const moveStep = () => {
+        if (!currentState) return;
+
+        const dx = targetX - currentState.player.x;
+        const dy = targetY - currentState.player.y;
+
+        // Stop if reached target
+        if (dx === 0 && dy === 0) {
+            moveIntervalId = null;
+            return;
+        }
+
+        let stepX = 0, stepY = 0;
+        if (dx !== 0) stepX = dx > 0 ? 1 : -1;
+        else if (dy !== 0) stepY = dy > 0 ? 1 : -1;
+
+        if (tryMove(currentState, stepX, stepY)) {
+            HandleWinCondition();
+            moveIntervalId = setTimeout(moveStep, 100);
+        } else {
+            // Stop if blocked
+            moveIntervalId = null;
+        }
+    };
+
+    moveStep();
+};
+
+
 
 // keyboard
 window.addEventListener('keydown', e => {
