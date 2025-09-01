@@ -3,3 +3,15 @@ Code improvements made by GameDevElliot, with the assistance of ChatGPT5
 
 Box and Wall sprites found on OpenGameArt.Org, by Alekei: https://opengameart.org/users/alekei
 Character sprites found on OpenGameArt.Org, by GrafxKid: https://opengameart.org/users/grafxkid
+
+Push sound:
+Button Click 1.wav by Mellau -- https://freesound.org/s/506054/ -- License: Attribution NonCommercial 4.0
+
+Push Out of Goal sound:
+Button Click 2.wav by Mellau -- https://freesound.org/s/506053/ -- License: Attribution NonCommercial 4.0
+
+Push Into Goal Sound:
+Button Click 3.wav by Mellau -- https://freesound.org/s/506052/ -- License: Attribution NonCommercial 4.0
+
+Victory Jingle:
+320655__rhodesmas__level-up-01.mp3 by shinephoenixstormcrow -- https://freesound.org/s/337049/ -- License: Attribution 3.0

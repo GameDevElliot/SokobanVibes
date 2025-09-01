@@ -46,11 +46,17 @@
                 <div class="column">
 
                     <div class="row">
+                        <label for="clickStepInterval" style="color:#cfe9f3">⏱️ Click Step Delay:</label>
+                        <input type="range" id="clickStepInterval" min="10" max="500" step="10" value="100">
+                        <span id="clickStepValue" style="margin-left:8px; color:#cfe9f3;">100</span>
+                    </div>
+
+                    <div class="row">
                         <label for="themeColorPicker" style="color:#cfe9f3">🎨 Theme Colour:</label>
                         <input type="color" id="themeColorPicker" value="#0b1220">
                     </div>
 
-                    <div class="row">
+                    <div class="row" style="padding:16px 0">
                         <button id="clearStorageButton">🗑️ Clear Local Storage</button>
                         <p class="hint" style="margin:0; flex:1">
                             ⚠️ This will erase all saved custom levels and progress.

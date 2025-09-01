@@ -154,3 +154,13 @@ button.small {
   border-radius: 8px;
   cursor: pointer;
 }
+
+#themeColorPicker {
+  border: 2px solid #cfe9f3; /* match your other UI */
+  border-radius: 4px;
+  padding: 0;
+  background: none;
+  height: 40px;
+  width: 40px;
+  cursor: pointer;
+}

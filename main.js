@@ -1,3 +1,18 @@
+//Audio
+const pushSound = new Audio('sounds/push.wav');
+const progressSound = new Audio('sounds/progress.wav');
+const regressSound = new Audio('sounds/regress.wav');
+const victorySound = new Audio('sounds/victory.mp3');
+var audioSettings = {
+    volume: 1,
+    muted: false
+};
+
+function PlaySound(audio) {
+    audio.volume = audioSettings.muted ? 0 : audioSettings.volume;
+    audio.play();
+}
+
 const root = document.documentElement;
 let cameFromEditor = false;
 const wallImage = new Image();
@@ -91,9 +106,17 @@ function DrawGrid(canvas, state) {
 
 function isWall(s, x, y) { return (y < 0 || x < 0 || y >= s.h || x >= s.w) || (s.grid[y][x] === '#'); }
 function crateAt(s, x, y) { return s.crates.find(c => c.x === x && c.y === y); }
-function tryMove(s, dx, dy) {
-    const nx = s.player.x + dx, ny = s.player.y + dy; if (isWall(s, nx, ny)) return false;
-    const c = crateAt(s, nx, ny); if (!c) { pushHistory(s); s.player.x = nx; s.player.y = ny; s.moves++; return true; }
+function tryMove(s, dx, dy)
+{
+    const nx = s.player.x + dx, ny = s.player.y + dy;
+    if (isWall(s, nx, ny)) return false;
+    const c = crateAt(s, nx, ny);
+    if (!c)
+    {
+        pushHistory(s); s.player.x = nx;
+        s.player.y = ny; s.moves++;
+        return true;
+    }
     const nnx = nx + dx, nny = ny + dy; if (isWall(s, nnx, nny) || crateAt(s, nnx, nny)) return false;
     pushHistory(s); c.x = nnx; c.y = nny; s.player.x = nx; s.player.y = ny; s.moves++; return true;
 }
@@ -117,6 +140,15 @@ const levelName = document.getElementById('levelName');
 const winMsg = document.getElementById('winMsg');
 const movesEl = document.getElementById('moves');
 const settingsUI = document.getElementById('settingsUI');
+
+const clickStepIntervalInput = document.getElementById("clickStepInterval");
+const clickStepValue = document.getElementById("clickStepValue");
+var stepDelay = parseInt(clickStepIntervalInput.value, 10) || 100;
+clickStepValue.textContent = stepDelay + "ms";
+clickStepIntervalInput.addEventListener("input", () => {
+    stepDelay = parseInt(clickStepIntervalInput.value, 10) || 100;
+    clickStepValue.textContent = stepDelay + "ms";
+});
 
 function ShowMenu() { HideEverything(); mainMenu.style.display = 'block'; }
 function ShowLevelSelect() { HideEverything(); levelSelect.style.display = 'block'; }
@@ -217,8 +249,15 @@ function setCustomLevels(arr) { localStorage.setItem('custom_levels', JSON.strin
 
 
 // --- Event wiring stock/custom ---
-
-document.getElementById('themeColorPicker').addEventListener('input', (e) => { root.style.setProperty('--bg', e.target.value); });
+const savedColor = localStorage.getItem('theme_color');
+if (savedColor) {
+  root.style.setProperty('--bg', JSON.parse(savedColor));
+}
+document.getElementById('themeColorPicker').addEventListener('input', (e) =>
+{
+    root.style.setProperty('--bg', e.target.value);
+    localStorage.setItem('theme_color',JSON.stringify(e.target.value));
+});
 document.getElementById('playStockButton').onclick = () => { buildLevelButtons(); ShowLevelSelect(); };
 document.getElementById('playCustomButton').onclick = () => { buildCustomLevelButtons(); ShowCustomLevelSelect(); };
 document.getElementById('backToMenu1').onclick = () => ShowMenu();
@@ -393,7 +432,7 @@ canvas.onclick = e => {
         }
 
         HandleWinCondition();
-        moveIntervalId = setTimeout(moveStep, 100);
+        moveIntervalId = setTimeout(moveStep, stepDelay);
     };
 
     moveStep();
@@ -419,6 +458,7 @@ function HandleWinCondition()
     DrawGrid(canvas, currentState);
 
     if (checkWin(currentState)) {
+
         winMsg.textContent = 'Level complete!';
         setTimeout(() => {
             if (cameFromEditor) {
@@ -428,6 +468,7 @@ function HandleWinCondition()
                 // Show the normal win popup
                 document.getElementById("youWinPopup").style.display = "flex";
             }
+            PlaySound(victorySound);
         }, 200);
     }
 }
