@@ -303,28 +303,28 @@ function RestartLevel() {
         loadLevel(currentLevelIndex, currentIsCustom);
     }
 }
-// Touch
-let startX, startY;
-window.addEventListener("touchstart", e => {
-    console.log("touch start");
-  const t = e.touches[0];
-  startX = t.clientX;
-  startY = t.clientY;
-});
-window.addEventListener("touchend", e => {
-    if (!gameMode) return;
-    if (!currentState) return;
-    let moved = false;
-    const t = e.changedTouches[0];
-    const dx = t.clientX - startX;
-    const dy = t.clientY - startY;
-    if (Math.abs(dx) > Math.abs(dy)) {
-        if (dx > 30) moved = tryMove(currentState, 1,0); else if (dx < -30) moved = tryMove(currentState, -1,0);
-    } else {
-        if (dy > 30) moved = tryMove(currentState, 0,1); else if (dy < -30) moved = tryMove(currentState, 0,-1);
-    }
-    if (moved)(HandleWinCondition())
-});
+// Touch Swipe - It works, but Commented out because it conficts with refresh, and click controls works for touch anyway.
+// let startX, startY;
+// window.addEventListener("touchstart", e => {
+//     console.log("touch start");
+//   const t = e.touches[0];
+//   startX = t.clientX;
+//   startY = t.clientY;
+// });
+// window.addEventListener("touchend", e => {
+//     if (!gameMode) return;
+//     if (!currentState) return;
+//     let moved = false;
+//     const t = e.changedTouches[0];
+//     const dx = t.clientX - startX;
+//     const dy = t.clientY - startY;
+//     if (Math.abs(dx) > Math.abs(dy)) {
+//         if (dx > 30) moved = tryMove(currentState, 1,0); else if (dx < -30) moved = tryMove(currentState, -1,0);
+//     } else {
+//         if (dy > 30) moved = tryMove(currentState, 0,1); else if (dy < -30) moved = tryMove(currentState, 0,-1);
+//     }
+//     if (moved)(HandleWinCondition())
+// });
 //mouse
 
 let moveIntervalId = null;
@@ -332,7 +332,6 @@ let moveIntervalId = null;
 canvas.onclick = e => {
     if (!gameMode || !currentState) return;
 
-    // Cancel any ongoing movement
     if (moveIntervalId !== null) {
         clearTimeout(moveIntervalId);
         moveIntervalId = null;
@@ -348,27 +347,58 @@ canvas.onclick = e => {
         const dx = targetX - currentState.player.x;
         const dy = targetY - currentState.player.y;
 
-        // Stop if reached target
+        // Arrived: brake
         if (dx === 0 && dy === 0) {
             moveIntervalId = null;
             return;
         }
 
         let stepX = 0, stepY = 0;
-        if (dx !== 0) stepX = dx > 0 ? 1 : -1;
-        else if (dy !== 0) stepY = dy > 0 ? 1 : -1;
 
-        if (tryMove(currentState, stepX, stepY)) {
-            HandleWinCondition();
-            moveIntervalId = setTimeout(moveStep, 100);
+        // Determine axis priority
+        if (Math.abs(dx) >= Math.abs(dy)) {
+            // Try X first
+            stepX = dx > 0 ? 1 : -1;
+            if (!tryMove(currentState, stepX, 0)) {
+                // If X blocked, try Y if non-zero
+                if (dy !== 0) {
+                    stepX = 0;
+                    stepY = dy > 0 ? 1 : -1;
+                    if (!tryMove(currentState, stepX, stepY)) {
+                        moveIntervalId = null; // Brake if blocked
+                        return;
+                    }
+                } else {
+                    moveIntervalId = null; // Brake if no movement
+                    return;
+                }
+            }
         } else {
-            // Stop if blocked
-            moveIntervalId = null;
+            // Try Y first
+            stepY = dy > 0 ? 1 : -1;
+            if (!tryMove(currentState, 0, stepY)) {
+                // If Y blocked, try X if non-zero
+                if (dx !== 0) {
+                    stepY = 0;
+                    stepX = dx > 0 ? 1 : -1;
+                    if (!tryMove(currentState, stepX, stepY)) {
+                        moveIntervalId = null; // Brake if blocked
+                        return;
+                    }
+                } else {
+                    moveIntervalId = null; // Brake if no movement
+                    return;
+                }
+            }
         }
+
+        HandleWinCondition();
+        moveIntervalId = setTimeout(moveStep, 100);
     };
 
     moveStep();
 };
+
 
 
 
