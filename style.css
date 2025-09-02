@@ -2,17 +2,20 @@
   --bg: #0f172a;
   --panel: #0b1220;
   --tile: #1f2937;
-  --floor: #0ea5a9;
-  --crate: #b45309;
-  --goal: #10b981;
-  --player: #f97316;
+  --text: #fc9aff;
 }
 
 html, body {
   height: 100%;
   margin: 0;
-  background: linear-gradient(180deg, var(--bg), #071126);
-  font-family: system-ui, -apple-system, Segoe UI, Roboto;
+  /* layered background: image tiles on top of gradient color */
+  background:
+    url('images/background.png') repeat, /* your tiled image */
+    var(--bg);
+  background-size: auto;       /* keep original tile size */
+  background-position: top left;
+  font-family: 'Baloo 2', system-ui;
+  color: var(--text);
 }
 
 .wrap {
@@ -28,12 +31,15 @@ html, body {
 .ui {
   width: 800px;
   max-width: 100%; /* prevent overflowing on small screens */
-  background: linear-gradient(
+  background: var(--panel);
+  /* background: linear-gradient(
     180deg,
-    rgba(255, 255, 255, 0.03),
-    rgba(255, 255, 255, 0.01)
-  );
-  border-radius: 12px;
+    rgba(0,0,0, 1),
+    rgba(0,0,0, 0.9)
+  ); */
+  border-radius: 8px;
+  border-width: medium;
+  border-style: solid;
   padding: 20px;
   box-shadow: 0 10px 30px rgba(2, 6, 23, 0.6);
   overflow: auto; /* allow scrolling inside UI if content grows */
@@ -56,14 +62,12 @@ html, body {
 h1 {
   margin: 0 0 12px 0;
   font-size: 20px;
-  color: #e6eef8;
 }
 
 h2 {
   margin: 0 0 12px 0;
   font-style: italic;
   font-size: 16px;
-  color: #e6eef8;
 }
 
 button {
@@ -111,7 +115,6 @@ button.small {
 }
 
 .hint {
-  color: #9fb8c0;
   font-size: 13px;
   margin-top: 8px;
 }
@@ -121,7 +124,6 @@ button.small {
   justify-content: space-between;
   align-items: center;
   margin-top: 12px;
-  color: #9fb8c0;
 }
 
 .tileSelector {
@@ -174,7 +176,6 @@ button.small {
 
 .settings-grid label {
   text-align: right;
-  color: #cfe9f3;
   white-space: nowrap;
 }
 
@@ -187,7 +188,6 @@ button.small {
 
 .settings-grid .hint {
   font-size: 0.85em;
-  color: #cfe9f3;
   margin: 0;
 }
 .settings-grid button.danger {
