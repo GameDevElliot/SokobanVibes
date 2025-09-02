@@ -41,33 +41,40 @@
             </div>
 
             <!-- Settings UI -->
-            <div id="settingsUI" style="display:none">
-                <h1>Settings</h1>
-                <div class="column">
-
-                    <div class="row">
-                        <label for="clickStepInterval" style="color:#cfe9f3">⏱️ Click Step Delay:</label>
+            <div id="settingsUI" style="display:none; max-width:600px; margin:auto;">
+                <h1 style="text-align:center;">Settings</h1>
+            
+                <div class="settings-grid">
+                    <label for="volumeSlider">🔊 Volume:</label>
+                    <input type="range" id="volumeSlider" min="0" max="1" step="0.01" value="1">
+            
+                    <label for="muteCheckbox">🔇 Mute:</label>
+                    <input type="checkbox" id="muteCheckbox">
+            
+                    <label for="autoMoveCheckbox">🚶 Auto-move multiple tiles:</label>
+                    <input type="checkbox" id="autoMoveCheckbox">
+            
+                    <label for="clickStepInterval">⏱️ Click Step Delay:</label>
+                    <div style="display:flex; align-items:center; gap:8px;">
                         <input type="range" id="clickStepInterval" min="10" max="500" step="10" value="100">
-                        <span id="clickStepValue" style="margin-left:8px; color:#cfe9f3;">100</span>
+                        <span id="clickStepValue">100ms</span>
                     </div>
-
-                    <div class="row">
-                        <label for="themeColorPicker" style="color:#cfe9f3">🎨 Theme Colour:</label>
-                        <input type="color" id="themeColorPicker" value="#0b1220">
-                    </div>
-
-                    <div class="row" style="padding:16px 0">
-                        <button id="clearStorageButton">🗑️ Clear Local Storage</button>
-                        <p class="hint" style="margin:0; flex:1">
-                            ⚠️ This will erase all saved custom levels and progress.
-                        </p>
-                    </div>
-                    <div class="row" style="justify-content:flex-end; margin-top:12px;">
-                        <button id="backFromSettingsButton">⬅️ Back</button>
-                    </div>
-
+            
+                    <label for="themeColorPicker">🎨 Theme Colour:</label>
+                    <input type="color" id="themeColorPicker" value="#0b1220">
+            
+                    <!-- Clear storage row -->
+                    <button id="clearStorageButton" class="danger">🗑️ Clear Local Storage</button>
+                    <p class="hint">⚠️ This will erase all custom levels, settings and progress.</p>
+                    
+                </div>
+            
+                <div style="text-align:right; margin-top:20px;">
+                    <button id="backFromSettingsButton">⬅️ Back</button>
                 </div>
             </div>
+            
+            
 
             <!-- Stock Level Select -->
             <div id="levelSelect" style="display:none">
@@ -154,7 +161,7 @@
     position: fixed; inset: 0; background: rgba(0,0,0,0.6); align-items: center; justify-content: center;">
                 <div style="background:#0b1220; padding:20px; border-radius:12px; text-align:center; width:300px; box-shadow:0 8px 20px rgba(0,0,0,0.7)">
                     <h2 style="color:#ff5555; margin-bottom:10px;">Are you sure?</h2>
-                    <p style="color:#cfe9f3; font-size:14px;">⚠️ This will erase all saved levels and progress.</p>
+                    <p style="color:#cfe9f3; font-size:14px;">⚠️ This will erase all custom levels, settings and progress.</p>
                     <div style="margin-top:15px; display:flex; gap:10px; justify-content:center;">
                         <button id="confirmYes">🗑️ Yes, clear</button>
                         <button id="confirmNo">❌ Cancel</button>
@@ -164,7 +171,7 @@
 
         </div>
     </div>
-
+    <script src="settings.js"></script>
     <script src="levels.js"></script>
     <script src="main.js"></script>
     <script src="editor.js"></script>

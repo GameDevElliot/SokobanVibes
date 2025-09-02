@@ -22,6 +22,7 @@ function makeEditorState() {
 const editorUI = document.getElementById('editorUI');
 const editorCanvas = document.getElementById('editorCanvas');
 const ectx = editorCanvas.getContext('2d');
+ectx.imageSmoothingEnabled = false;
 const TILE_TYPES = { 'Wall': '#', 'Floor': ' ', 'Goal': '.', 'Crate': '$', 'Player': '@' };
 let selectedTile = '#';
 let editorGrid = Array.from({ length: 10 }, () => Array(10).fill(' '));
