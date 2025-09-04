@@ -129,11 +129,12 @@
                 <div class="levels" id="editorOpenLevelsContainer"></div>
                 <div style="margin-top:10px"><button id="backToEditorButton">⬅️ Back to Editor</button></div>
             </div>
+            
+            <!-- dark overlay -->
+            <div id="darkOverlay" class="overlay"></div>
 
             <!-- You Win Popup -->
-            <div id="youWinPopup" style="display:none;
-                position: fixed; inset: 0; background: rgba(0,0,0,0.6); align-items: center; justify-content: center;">
-                <div style="background:#0b1220; padding:20px; border-radius:12px; text-align:center; width:300px; box-shadow:0 8px 20px rgba(0,0,0,0.7)">
+            <div id="youWinPopup" class="popup">
                     <h2 style="color:#55ff55; margin-bottom:10px;">You Win!</h2>
                     <p style="color:#cfe9f3; font-size:14px;">Great job finishing this level 🎉</p>
                     <div style="margin-top:15px; display:flex; flex-direction:column; gap:10px;">
@@ -141,37 +142,34 @@
                         <button id="nextLevelButton">➡️ Next Level</button>
                         <button id="mainMenuButton">🏠 Main Menu</button>
                     </div>
-                </div>
             </div>
             
             <!-- Playtest Complete Popup -->
-            <div id="playtestPopup" style="display:none;
-                position: fixed; inset: 0; background: rgba(0,0,0,0.6); align-items: center; justify-content: center;">
-                <div style="background:#0b1220; padding:20px; border-radius:12px; text-align:center; width:300px; box-shadow:0 8px 20px rgba(0,0,0,0.7)">
+            <div id="playtestPopup" class="popup">
                     <h2 style="color:#55ff55; margin-bottom:10px;">Level Solved!</h2>
                     <p style="color:#cfe9f3; font-size:14px;">Looks like your puzzle works ✔</p>
                     <div style="margin-top:15px; display:flex; flex-direction:column; gap:10px;">
                         <button id="replayButtonEditor">🔄 Replay</button>
                         <button id="returnToEditorButton">✏️ Return to Editor</button>
                     </div>
-                </div>
             </div>
 
             <!-- Confirm Clear Popup -->
-            <div id="confirmPopup" style="display:none;
-    position: fixed; inset: 0; background: rgba(0,0,0,0.6); align-items: center; justify-content: center;">
-                <div style="background:#0b1220; padding:20px; border-radius:12px; text-align:center; width:300px; box-shadow:0 8px 20px rgba(0,0,0,0.7)">
+            <div id="confirmPopup" class=popup>
                     <h2 style="color:#ff5555; margin-bottom:10px;">Are you sure?</h2>
                     <p style="color:#cfe9f3; font-size:14px;">⚠️ This will erase all custom levels, settings and progress.</p>
                     <div style="margin-top:15px; display:flex; gap:10px; justify-content:center;">
                         <button id="confirmYes">🗑️ Yes, clear</button>
                         <button id="confirmNo">❌ Cancel</button>
                     </div>
-                </div>
+                
             </div>
 
         </div>
     </div>
+    
+    <script src="assets.js"></script>    
+    <script src="confetti.js"></script>    
     <script src="settings.js"></script>
     <script src="levels.js"></script>
     <script src="main.js"></script>

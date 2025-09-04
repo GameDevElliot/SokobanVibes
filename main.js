@@ -1,29 +1,3 @@
-//Audio
-const pushSound = new Audio('sounds/push.wav');
-const progressSound = new Audio('sounds/progress.wav');
-const regressSound = new Audio('sounds/regress.wav');
-const victorySound = new Audio('sounds/victory.mp3');
-
-function PlaySound(audio) {
-    audio.volume = audioSettings.muted ? 0 : audioSettings.volume;
-    audio.play();
-}
-
-const root = document.documentElement;
-let cameFromEditor = false;
-const wallImage = new Image();
-wallImage.src = 'images/wall.png';
-const crateImage = new Image();
-crateImage.src = 'images/crate.png';
-const characterImage = new Image();
-characterImage.src = 'images/character_ghost.png';
-const goalImage = new Image();
-goalImage.src = 'images/goal.png';
-const sock1Image = new Image();
-sock1Image.src = 'images/sock1.png';
-const sock2Image = new Image();
-sock2Image.src = 'images/sock2.png';
-
 // --- unsaved changes window warning ---
 let hasUnsavedChanges = false;
 window.addEventListener("beforeunload", (e) => {
@@ -178,6 +152,7 @@ function loadLevel(index, isCustom = false) {
 }
 function LoadNextLevel() {
     // hide win popups
+    document.getElementById('darkOverlay').style.display = 'none';
     document.getElementById('youWinPopup').style.display = 'none';
     document.getElementById('playtestPopup').style.display = 'none';
 
@@ -252,34 +227,40 @@ document.getElementById('settingsButton').onclick = () => { ShowSettings() };
 document.getElementById('backFromSettingsButton').onclick = () => { ShowMenu(); };
 // Shared replay handler (same as restart button)
 document.getElementById("replayButton").onclick = () => {
+    document.getElementById('darkOverlay').style.display = 'none';
     document.getElementById("youWinPopup").style.display = "none";
     RestartLevel();
 };
 document.getElementById("replayButtonEditor").onclick = () => {
+    document.getElementById('darkOverlay').style.display = 'none';
     document.getElementById("playtestPopup").style.display = "none";
     RestartLevel();
 };
 
 // Next level
 document.getElementById("nextLevelButton").onclick = () => {
+    document.getElementById('darkOverlay').style.display = 'none';
     document.getElementById("youWinPopup").style.display = "none";
     LoadNextLevel(); // you'll need to implement this if not done yet
 };
 
 // Main menu
 document.getElementById("mainMenuButton").onclick = () => {
+    document.getElementById('darkOverlay').style.display = 'none';
     document.getElementById("youWinPopup").style.display = "none";
     ShowMenu()
 };
 
 // Return to editor
 document.getElementById("returnToEditorButton").onclick = () => {
+    document.getElementById('darkOverlay').style.display = 'none';
     document.getElementById("playtestPopup").style.display = "none";
     ShowEditor();
 };
 
 function handleMove(dx, dy) {
     if (!gameMode || !currentState) return;
+    stopMove();
     if (tryMove(currentState, dx, dy)) HandleWinCondition();
 }
 
@@ -293,16 +274,20 @@ const confirmYes = document.getElementById("confirmYes");
 const confirmNo = document.getElementById("confirmNo");
 
 document.getElementById("clearStorageButton").onclick = () => {
+    document.getElementById('darkOverlay').style.display = 'flex';
     confirmPopup.style.display = "flex";
 };
 
 confirmYes.onclick = () => {
     localStorage.clear();
+        document.getElementById('darkOverlay').style.display = 'none';
     confirmPopup.style.display = "none";
     alert("All progress and custom levels cleared");
 };
 
 confirmNo.onclick = () => {
+    
+    document.getElementById('darkOverlay').style.display = 'none';
     confirmPopup.style.display = "none";
 };
 
@@ -343,79 +328,43 @@ function RestartLevel() {
 // });
 //mouse
 
-let moveIntervalId = null;
+var moveIntervalId = null;
 
 canvas.onclick = e => {
     if (!gameMode || !currentState) return;
 
     if (moveIntervalId !== null) {
-        clearTimeout(moveIntervalId);
-        moveIntervalId = null;
+        clearInterval(moveIntervalId);
     }
 
     const rect = canvas.getBoundingClientRect();
     const targetX = Math.floor((e.clientX - rect.left) / tileSize);
     const targetY = Math.floor((e.clientY - rect.top) / tileSize);
 
-    const moveStep = () => {
-        if (!currentState) return;
+    moveIntervalId = setInterval(() => {
+        if (!currentState) return stopMove();
 
         const dx = targetX - currentState.player.x;
         const dy = targetY - currentState.player.y;
 
-        // Arrived: brake
-        if (dx === 0 && dy === 0) {
-            moveIntervalId = null;
-            return;
-        }
+        if (dx === 0 && dy === 0) return stopMove();
 
-        let stepX = 0, stepY = 0;
-
-        // Determine axis priority
+        // try move on the primary access || then try move on the secondary axis.
         if (Math.abs(dx) >= Math.abs(dy)) {
-            // Try X first
-            stepX = dx > 0 ? 1 : -1;
-            if (!tryMove(currentState, stepX, 0)) {
-                // If X blocked, try Y if non-zero
-                if (dy !== 0) {
-                    stepX = 0;
-                    stepY = dy > 0 ? 1 : -1;
-                    if (!tryMove(currentState, stepX, stepY)) {
-                        moveIntervalId = null; // Brake if blocked
-                        return;
-                    }
-                } else {
-                    moveIntervalId = null; // Brake if no movement
-                    return;
-                }
-            }
-        } else {
-            // Try Y first
-            stepY = dy > 0 ? 1 : -1;
-            if (!tryMove(currentState, 0, stepY)) {
-                // If Y blocked, try X if non-zero
-                if (dx !== 0) {
-                    stepY = 0;
-                    stepX = dx > 0 ? 1 : -1;
-                    if (!tryMove(currentState, stepX, stepY)) {
-                        moveIntervalId = null; // Brake if blocked
-                        return;
-                    }
-                } else {
-                    moveIntervalId = null; // Brake if no movement
-                    return;
-                }
-            }
-        }
+            moved = tryMove(currentState, dx > 0 ? 1 : -1, 0) || (dy !== 0 && tryMove(currentState, 0, dy > 0 ? 1 : -1)); }
+        else {
+            moved = tryMove(currentState, 0, dy > 0 ? 1 : -1) || (dx !== 0 && tryMove(currentState, dx > 0 ? 1 : -1, 0)); }
+
+        if (!moved) return stopMove();
 
         HandleWinCondition();
-        moveIntervalId = setTimeout(moveStep, stepDelay);
-    };
+    }, stepDelay);
 
-    moveStep();
 };
-
-
+function stopMove() {
+    clearInterval(moveIntervalId);
+    moveIntervalId = null;
+}
 
 
 // keyboard
@@ -423,10 +372,10 @@ window.addEventListener('keydown', e => {
     if (!gameMode) return;
     if (!currentState) return;
     let moved = false;
-    if (['ArrowUp', 'w', 'W'].includes(e.key)) moved = tryMove(currentState, 0, -1);
-    if (['ArrowDown', 's', 'S'].includes(e.key)) moved = tryMove(currentState, 0, 1);
-    if (['ArrowLeft', 'a', 'A'].includes(e.key)) moved = tryMove(currentState, -1, 0);
-    if (['ArrowRight', 'd', 'D'].includes(e.key)) moved = tryMove(currentState, 1, 0);
+    if (['ArrowUp', 'w', 'W'].includes(e.key)) moved = handleMove(0, -1);
+    if (['ArrowDown', 's', 'S'].includes(e.key)) moved = handleMove(0, 1);
+    if (['ArrowLeft', 'a', 'A'].includes(e.key)) moved = handleMove(-1, 0);
+    if (['ArrowRight', 'd', 'D'].includes(e.key)) moved = handleMove(1, 0);
     if (moved)(HandleWinCondition())
 });
 function HandleWinCondition()
@@ -440,11 +389,14 @@ function HandleWinCondition()
         setTimeout(() => {
             if (cameFromEditor) {
                 // Show the playtest popup
+                document.getElementById('darkOverlay').style.display = 'flex';
                 document.getElementById("playtestPopup").style.display = "flex";
             } else {
                 // Show the normal win popup
+                document.getElementById('darkOverlay').style.display = 'flex';
                 document.getElementById("youWinPopup").style.display = "flex";
             }
+            triggerConfetti();
             PlaySound(victorySound);
         }, 200);
     }
