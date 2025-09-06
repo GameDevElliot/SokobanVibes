@@ -90,7 +90,19 @@ function tryMove(s, dx, dy)
     const nnx = nx + dx, nny = ny + dy; if (isWall(s, nnx, nny) || crateAt(s, nnx, nny)) return false;
     pushHistory(s); c.x = nnx; c.y = nny; s.player.x = nx; s.player.y = ny; s.moves++; return true;
 }
-function checkWin(s) { return s.goals.every(g => s.crates.some(c => c.x === g.x && c.y === g.y)); }
+function checkWin(s) {
+    if (s.crates.length <= s.goals.length) {
+      // fewer crates → check every crate is on a goal
+      return s.crates.every(c =>
+        s.goals.some(g => g.x === c.x && g.y === c.y)
+      );
+    } else {
+      // fewer goals → check every goal has a crate
+      return s.goals.every(g =>
+        s.crates.some(c => c.x === g.x && c.y === g.y)
+      );
+    }
+  }
 function pushHistory(s)
 {
     s.history.push({ player: { x: s.player.x, y: s.player.y }, crates: s.crates.map(c => ({ ...c })), moves: s.moves });
@@ -431,11 +443,11 @@ window.addEventListener('keydown', e => {
 });
 function HandleWinCondition()
 {
-    updateNextLevelButton();
     movesEl.textContent = currentState.moves;
     DrawGrid(canvas, currentState);
 
     if (checkWin(currentState)) {
+        updateNextLevelButton();
 
         winMsg.textContent = 'Level complete!';
         setTimeout(() => {
