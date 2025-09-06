@@ -139,30 +139,62 @@ function HideEverything() {
     settingsUI.style.display = 'none';
 }
 
-function loadLevel(index, isCustom = false) {
+function loadLevel(index, pack = LEVELS) {
     currentLevelIndex = index;
-    currentIsCustom = isCustom;
-    const src = isCustom ? getCustomLevels()[index] : LEVELS[index];
+    currentPack = pack;
+    currentIsCustom = pack.isCustom;
+
+    const src = pack.levels[index];
     currentState = makeState(src);
+
     levelName.textContent = src.name;
     winMsg.textContent = '';
     movesEl.textContent = '0';
+
     DrawGrid(canvas, currentState);
     ShowGame(false);
 }
+function updateNextLevelButton() {
+    const nextBtn = document.getElementById('nextLevelButton');
+    if (!currentPack) return;
+
+    const nextIndex = currentLevelIndex + 1;
+
+    if (nextIndex >= currentPack.levels.length) {
+        // No more levels in the current pack
+        if (currentPack === TUTORIAL_LEVELS) {
+            // Tutorial finished → start main levels
+            nextBtn.style.display = 'inline-block';
+            nextBtn.textContent = "🎯 Start Main Levels";
+        } else {
+            // Other packs → hide button
+            nextBtn.style.display = 'none';
+        }
+    } else {
+        // More levels → show normal "Next Level"
+        nextBtn.style.display = 'inline-block';
+        nextBtn.textContent = "➡️ Next Level";
+    }
+}
+
+
 function LoadNextLevel() {
     // hide win popups
     document.getElementById('darkOverlay').style.display = 'none';
     document.getElementById('youWinPopup').style.display = 'none';
     document.getElementById('playtestPopup').style.display = 'none';
 
-    // pick level list
-    const levelsList = currentIsCustom ? getCustomLevels() : LEVELS;
+    // get current pack
+    const pack = currentPack || LEVELS;
 
     // advance
     const nextIndex = currentLevelIndex + 1;
-    if (nextIndex >= levelsList.length) {
-        if (currentIsCustom) {
+
+    if (nextIndex >= pack.levels.length) {
+        if (pack === TUTORIAL_LEVELS) {
+            // Tutorial finished → start main levels
+            loadLevel(0, LEVELS);
+        } else if (pack.isCustom) {
             ShowCustomLevelSelect();
         } else {
             ShowLevelSelect();
@@ -170,43 +202,61 @@ function LoadNextLevel() {
         return;
     }
 
-    // load via your existing loader
-    loadLevel(nextIndex, currentIsCustom);
+    // load next level in the same pack
+    loadLevel(nextIndex, pack);
 }
-function buildLevelButtons()
-{
-    // tutorialsContainer.innerHTML = '';
-    // TUTORIAL_LEVELS.forEach((lev, i) => {
-    //     const b = document.createElement('button'); // changed from 'div' to 'button'
-    //     b.className = 'levelButton';
-    //     b.textContent = lev.name;
-    //     b.onclick = () => loadLevel(i);
-    //     tutorialsContainer.appendChild(b);
-    // });
 
-    levelsContainer.innerHTML = '';
-    LEVELS.forEach((lev, i) => {
-        const b = document.createElement('button'); // changed from 'div' to 'button'
+
+function buildLevelButtons() {
+    // Tutorial buttons
+    tutorialsContainer.innerHTML = '';
+    TUTORIAL_LEVELS.levels.forEach((lev, i) => {
+        const b = document.createElement('button');
         b.className = 'levelButton';
         b.textContent = lev.name;
-        b.onclick = () => loadLevel(i);
+        b.onclick = () => loadLevel(i, TUTORIAL_LEVELS);
+        tutorialsContainer.appendChild(b);
+    });
+
+    // Main levels buttons
+    levelsContainer.innerHTML = '';
+    LEVELS.levels.forEach((lev, i) => {
+        const b = document.createElement('button');
+        b.className = 'levelButton';
+        b.textContent = lev.name;
+        b.onclick = () => loadLevel(i, LEVELS);
         levelsContainer.appendChild(b);
     });
 }
 
+
 function buildCustomLevelButtons() {
     customLevelsContainer.innerHTML = '';
-    const arr = getCustomLevels();
-    arr.forEach((lev, i) => {
-        const b = document.createElement('button'); // changed from 'div' to 'button'
+
+    const levels = JSON.parse(localStorage.getItem('custom_levels') || '[]');
+    const customPack = {
+        levels,
+        isCustom: true,
+        name: "Custom Levels"
+    };
+
+    levels.forEach((lev, i) => {
+        const b = document.createElement('button');
         b.className = 'levelButton';
         b.textContent = lev.name;
-        b.onclick = () => loadLevel(i, true);
+        b.onclick = () => loadLevel(i, customPack);
         customLevelsContainer.appendChild(b);
     });
 }
-function getCustomLevels() { return JSON.parse(localStorage.getItem('custom_levels') || '[]'); }
-function setCustomLevels(arr) { localStorage.setItem('custom_levels', JSON.stringify(arr)); }
+
+function getCustomLevels() {
+    return JSON.parse(localStorage.getItem('custom_levels') || '[]');
+}
+
+function setCustomLevels(arr) {
+    localStorage.setItem('custom_levels', JSON.stringify(arr));
+}
+
 
 
 // --- Event wiring stock/custom ---
@@ -241,7 +291,7 @@ document.getElementById("replayButtonEditor").onclick = () => {
 document.getElementById("nextLevelButton").onclick = () => {
     document.getElementById('darkOverlay').style.display = 'none';
     document.getElementById("youWinPopup").style.display = "none";
-    LoadNextLevel(); // you'll need to implement this if not done yet
+    LoadNextLevel();
 };
 
 // Main menu
@@ -301,9 +351,10 @@ function RestartLevel() {
         winMsg.textContent = '';
         DrawGrid(canvas, currentState);
     } else {
-        loadLevel(currentLevelIndex, currentIsCustom);
+        loadLevel(currentLevelIndex, currentPack);
     }
 }
+
 // Touch Swipe - It works, but Commented out because it conficts with refresh, and click controls works for touch anyway.
 // let startX, startY;
 // window.addEventListener("touchstart", e => {
@@ -380,6 +431,7 @@ window.addEventListener('keydown', e => {
 });
 function HandleWinCondition()
 {
+    updateNextLevelButton();
     movesEl.textContent = currentState.moves;
     DrawGrid(canvas, currentState);
 
