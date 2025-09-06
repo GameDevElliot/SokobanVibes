@@ -26,6 +26,6 @@ const victorySound = loadAudio('sounds/victory.mp3');
 
 // --- Play sound helper (kept for existing code) ---
 function PlaySound(audio) {
-    audio.volume = audioSettings.muted ? 0 : audioSettings.volume;
+    audio.volume = muted ? 0 : volume;
     audio.play();
 }

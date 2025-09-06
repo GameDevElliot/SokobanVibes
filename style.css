@@ -8,11 +8,10 @@
 html, body {
   height: 100%;
   margin: 0;
-  /* layered background: image tiles on top of gradient color */
   background:
-    url('images/background.png') repeat, /* your tiled image */
+    url('images/background.png') repeat,
     var(--bg);
-  background-size: auto;       /* keep original tile size */
+  background-size: auto;
   background-position: top left;
   font-family: 'Baloo 2', system-ui;
   color: var(--text);
